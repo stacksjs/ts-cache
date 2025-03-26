@@ -2,18 +2,30 @@
   "name": "ts-cache",
   "type": "module",
   "version": "0.0.0",
-  "description": "Easily handle EU MOSS tax & VAT regulations.",
+  "description": "Simple and fast TypeScript in-memory caching. Modern TypeScript port of node-cache.",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
-  "homepage": "https://github.com/stacksjs/ts-starter#readme",
+  "homepage": "https://github.com/stacksjs/ts-cache#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stacksjs/ts-starter.git"
+    "url": "git+https://github.com/stacksjs/ts-cache.git"
   },
   "bugs": {
-    "url": "https://github.com/stacksjs/ts-starter/issues"
+    "url": "https://github.com/stacksjs/ts-cache/issues"
   },
-  "keywords": ["typescript", "calculator", "vat", "tax", "moss", "european", "union", "library", "bun", "nodejs"],
+  "keywords": [
+    "typescript",
+    "cache",
+    "caching",
+    "memory",
+    "internal",
+    "local",
+    "node",
+    "in-memory",
+    "library",
+    "memcached",
+    "object"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -39,6 +51,10 @@
     "build:docs": "bun --bun vitepress build docs",
     "preview:docs": "bun --bun vitepress preview docs",
     "typecheck": "bun --bun tsc --noEmit"
+  },
+  "dependencies": {
+    "@types/clone": "^2.1.4",
+    "clone": "^2.1.2"
   },
   "devDependencies": {
     "@stacksjs/docs": "^0.70.10",
