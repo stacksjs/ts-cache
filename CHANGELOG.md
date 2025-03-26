@@ -1,4 +1,16 @@
 
+## v0.1.0...main
+
+[compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.0...main)
+
+### 🏡 Chore
+
+- Adjust name ([a832b61](https://github.com/stacksjs/ts-cache/commit/a832b61))
+
+### ❤️ Contributors
+
+- Chris ([@chrisbbreuer](https://github.com/chrisbbreuer))
+
 ## ...main
 
 

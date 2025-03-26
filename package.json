@@ -1,7 +1,7 @@
 {
   "name": "@stacksjs/ts-cache",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple and fast TypeScript in-memory caching. Modern TypeScript port of node-cache.",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
