@@ -7,7 +7,7 @@ Learn how to handle special VAT cases and territories in the EU.
 The EU has several special territories with different VAT rules:
 
 ```typescript
-import { VatCalculator } from 'ts-vat'
+import { VatCalculator } from 'ts-cache'
 
 const calculator = new VatCalculator()
 

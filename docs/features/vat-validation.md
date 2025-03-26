@@ -5,7 +5,7 @@ Learn how to validate EU VAT numbers using the VIES service.
 ## Basic Validation
 
 ```typescript
-import { VatCalculator } from 'ts-vat'
+import { VatCalculator } from 'ts-cache'
 
 const calculator = new VatCalculator()
 
@@ -51,7 +51,7 @@ const examples = {
 ### VIES Service Errors
 
 ```typescript
-import { VatCheckUnavailableException } from 'ts-vat'
+import { VatCheckUnavailableException } from 'ts-cache'
 
 try {
   const isValid = await calculator.isValidVatNumber('DE123456789')
@@ -67,7 +67,7 @@ catch (error) {
 ### Format Errors
 
 ```typescript
-import { InvalidVatNumberException } from 'ts-vat'
+import { InvalidVatNumberException } from 'ts-cache'
 
 try {
   await calculator.getVatDetails('invalid-format')

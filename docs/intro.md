@@ -1,8 +1,8 @@
-<p align="center"><img src="https://github.com/stacksjs/ts-vat/blob/main/.github/art/cover.jpg?raw=true" alt="Social Card of this repo"></p>
+<p align="center"><img src="https://github.com/stacksjs/ts-cache/blob/main/.github/art/cover.jpg?raw=true" alt="Social Card of this repo"></p>
 
 # Introduction
 
-ts-vat is a powerful TypeScript library designed to handle EU VAT calculations and validations with precision and ease. It provides a comprehensive solution for businesses dealing with European Union Value Added Tax regulations, including special cases, reduced rates, and post-Brexit UK rules.
+ts-cache is a powerful TypeScript library designed to handle EU VAT calculations and validations with precision and ease. It provides a comprehensive solution for businesses dealing with European Union Value Added Tax regulations, including special cases, reduced rates, and post-Brexit UK rules.
 
 ## Features
 
@@ -44,7 +44,7 @@ ts-vat is a powerful TypeScript library designed to handle EU VAT calculations a
 
 ## Browser Compatibility
 
-ts-vat is designed to work in both Node.js / Bun and modern browser environments. Here's what you need to know:
+ts-cache is designed to work in both Node.js / Bun and modern browser environments. Here's what you need to know:
 
 ### Modern Browsers
 
@@ -70,7 +70,7 @@ When using the library in a browser environment, you may need to handle CORS for
 
 ## Performance Optimization
 
-ts-vat is optimized for:
+ts-cache is optimized for:
 
 1. **Tree Shaking**: Only import what you need
 2. **Caching**: Implement response caching for VAT validations
@@ -79,7 +79,7 @@ ts-vat is optimized for:
 
 ## Use Cases
 
-ts-vat is perfect for:
+ts-cache is perfect for:
 
 - E-commerce platforms
 - SaaS businesses
@@ -93,7 +93,7 @@ ts-vat is perfect for:
 Here's a quick example of calculating VAT for a product sold to a customer in Germany:
 
 ```typescript
-import { VatCalculator } from 'ts-vat'
+import { VatCalculator } from 'ts-cache'
 
 const calculator = new VatCalculator({
   businessCountryCode: 'DE',
@@ -126,7 +126,7 @@ console.log(result)
 // }
 ```
 
-## Why ts-vat?
+## Why ts-cache?
 
 1. **Accuracy**: Built with precision in mind, following official EU VAT rules and regulations
 2. **Type Safety**: Full TypeScript support ensures compile-time error catching

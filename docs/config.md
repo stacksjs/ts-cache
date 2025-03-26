@@ -1,13 +1,13 @@
 # Configuration
 
-ts-vat provides extensive configuration options to customize its behavior according to your needs. Here's a complete guide to all available configuration options.
+ts-cache provides extensive configuration options to customize its behavior according to your needs. Here's a complete guide to all available configuration options.
 
 ## Basic Configuration
 
 The `VatCalculator` constructor accepts a configuration object that allows you to customize its behavior:
 
 ```typescript
-import { VatCalculator } from 'ts-vat'
+import { VatCalculator } from 'ts-cache'
 
 const calculator = new VatCalculator({
   // Your configuration options here
@@ -120,7 +120,7 @@ const calculator = new VatCalculator({
 
 ## Default Configuration
 
-ts-vat comes with sensible defaults that you can override as needed:
+ts-cache comes with sensible defaults that you can override as needed:
 
 ```typescript
 const defaultConfig = {

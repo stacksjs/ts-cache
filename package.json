@@ -1,7 +1,7 @@
 {
-  "name": "ts-vat",
+  "name": "ts-cache",
   "type": "module",
-  "version": "0.1.1",
+  "version": "0.0.0",
   "description": "Easily handle EU MOSS tax & VAT regulations.",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",

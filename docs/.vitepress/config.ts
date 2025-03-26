@@ -24,7 +24,7 @@ const nav = [
     items: [
       { text: 'EU VAT Rules', link: 'https://taxation-customs.ec.europa.eu/vat_en' },
       { text: 'VIES Service', link: 'https://ec.europa.eu/taxation_customs/vies/' },
-      { text: 'Contributing', link: 'https://github.com/stacksjs/ts-vat/blob/main/.github/CONTRIBUTING.md' },
+      { text: 'Contributing', link: 'https://github.com/stacksjs/ts-cache/blob/main/.github/CONTRIBUTING.md' },
       { text: 'License', link: '/license' },
     ],
   },
@@ -59,12 +59,12 @@ const sidebar = {
 }
 
 const description = 'A TypeScript library for EU VAT calculations and validations, supporting VIES service integration, special territories, and B2B transactions.'
-const title = 'ts-vat | EU VAT Calculator for TypeScript'
+const title = 'ts-cache | EU VAT Calculator for TypeScript'
 
 export default withPwa(
   defineConfig({
     lang: 'en-US',
-    title: 'ts-vat',
+    title: 'ts-cache',
     description,
     metaChunk: true,
     cleanUrls: true,
@@ -82,9 +82,9 @@ export default withPwa(
       ['meta', { property: 'og:title', content: title }],
       ['meta', { property: 'og:description', content: description }],
 
-      ['meta', { property: 'og:site_name', content: 'ts-vat' }],
+      ['meta', { property: 'og:site_name', content: 'ts-cache' }],
       ['meta', { property: 'og:image', content: './images/og-image.png' }],
-      ['meta', { property: 'og:url', content: 'https://ts-vat.netlify.app/' }],
+      ['meta', { property: 'og:url', content: 'https://ts-cache.netlify.app/' }],
       ...analyticsHead,
     ],
 
@@ -101,7 +101,7 @@ export default withPwa(
       sidebar,
 
       editLink: {
-        pattern: 'https://github.com/chrisbreuer/ts-vat/edit/main/docs/:path',
+        pattern: 'https://github.com/chrisbreuer/ts-cache/edit/main/docs/:path',
         text: 'Edit this page on GitHub',
       },
 
@@ -111,7 +111,7 @@ export default withPwa(
       },
 
       socialLinks: [
-        { icon: 'github', link: 'https://github.com/chrisbreuer/ts-vat' },
+        { icon: 'github', link: 'https://github.com/chrisbreuer/ts-cache' },
         { icon: 'twitter', link: 'https://twitter.com/stacksjs' },
         { icon: 'bluesky', link: 'https://bsky.app/profile/chrisbreuer.dev' },
         { icon: 'discord', link: 'https://discord.gg/stacksjs' },
@@ -126,8 +126,8 @@ export default withPwa(
     },
 
     pwa: {
-      name: 'ts-vat Documentation',
-      short_name: 'ts-vat Docs',
+      name: 'ts-cache Documentation',
+      short_name: 'ts-cache Docs',
       theme_color: '#3eaf7c',
       icons: [
         {

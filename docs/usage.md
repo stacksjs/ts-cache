@@ -1,11 +1,11 @@
 # Usage Guide
 
-ts-vat provides a comprehensive API for handling EU VAT calculations and validations. This guide will walk you through common use cases and best practices.
+ts-cache provides a comprehensive API for handling EU VAT calculations and validations. This guide will walk you through common use cases and best practices.
 
 ## Quick Start
 
 ```typescript
-import { VatCalculator } from 'ts-vat'
+import { VatCalculator } from 'ts-cache'
 
 // Create a calculator instance
 const calculator = new VatCalculator({
@@ -41,7 +41,7 @@ console.log(result)
 ### Simple VAT Calculation
 
 ```typescript
-import { VatCalculator } from 'ts-vat'
+import { VatCalculator } from 'ts-cache'
 
 const calculator = new VatCalculator()
 
@@ -188,7 +188,7 @@ import {
   InvalidPostalCodeException,
   InvalidVatNumberException,
   VatCheckUnavailableException,
-} from 'ts-vat'
+} from 'ts-cache'
 
 try {
   const result = await calculator.getVatDetails('invalid-vat')

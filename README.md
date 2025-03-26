@@ -6,7 +6,7 @@
 <!-- [![npm downloads][npm-downloads-src]][npm-downloads-href] -->
 <!-- [![Codecov][codecov-src]][codecov-href] -->
 
-# ts-vat
+# ts-cache
 
 A TypeScript VAT calculator for EU countries. This package helps you calculate VAT rates for different EU countries, validate VAT numbers, and handle special VAT rules and exceptions.
 
@@ -22,7 +22,7 @@ A TypeScript VAT calculator for EU countries. This package helps you calculate V
 ## Installation
 
 ```bash
-npm install ts-vat
+npm install ts-cache
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ npm install ts-vat
 ### Basic VAT Calculation
 
 ```typescript
-import { VatCalculator } from 'ts-vat'
+import { VatCalculator } from 'ts-cache'
 
 const calculator = new VatCalculator()
 
@@ -121,7 +121,7 @@ bun test
 
 ## Changelog
 
-Please see our [releases](https://github.com/stackjs/ts-vat/releases) page for more information on what has changed recently.
+Please see our [releases](https://github.com/stackjs/ts-cache/releases) page for more information on what has changed recently.
 
 ## Contributing
 
@@ -131,7 +131,7 @@ Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
 
 For help, discussion about best practices, or any other conversation that would benefit from being searchable:
 
-[Discussions on GitHub](https://github.com/stacksjs/ts-vat/discussions)
+[Discussions on GitHub](https://github.com/stacksjs/ts-cache/discussions)
 
 For casual chit-chat with others using this package:
 
@@ -154,7 +154,7 @@ We would like to extend our thanks to the following sponsors for funding Stacks 
 
 - [`vat-calculator`](https://github.com/driesvints/vat-calculator) _for the original PHP implementation_
 - [Chris Breuer](https://github.com/chrisbbreuer)
-- [All Contributors](https://github.com/stacksjs/ts-vat/contributors)
+- [All Contributors](https://github.com/stacksjs/ts-cache/contributors)
 
 ## License
 
@@ -163,10 +163,10 @@ The MIT License (MIT). Please see [LICENSE](LICENSE.md) for more information.
 Made with 💙
 
 <!-- Badges -->
-[npm-version-src]: https://img.shields.io/npm/v/ts-vat?style=flat-square
-[npm-version-href]: https://npmjs.com/package/ts-vat
-[github-actions-src]: https://img.shields.io/github/actions/workflow/status/stacksjs/ts-vat/ci.yml?style=flat-square&branch=main
-[github-actions-href]: https://github.com/stacksjs/ts-vat/actions?query=workflow%3Aci
+[npm-version-src]: https://img.shields.io/npm/v/ts-cache?style=flat-square
+[npm-version-href]: https://npmjs.com/package/ts-cache
+[github-actions-src]: https://img.shields.io/github/actions/workflow/status/stacksjs/ts-cache/ci.yml?style=flat-square&branch=main
+[github-actions-href]: https://github.com/stacksjs/ts-cache/actions?query=workflow%3Aci
 
-<!-- [codecov-src]: https://img.shields.io/codecov/c/gh/stacksjs/ts-vat/main?style=flat-square
-[codecov-href]: https://codecov.io/gh/stacksjs/ts-vat -->
+<!-- [codecov-src]: https://img.shields.io/codecov/c/gh/stacksjs/ts-cache/main?style=flat-square
+[codecov-href]: https://codecov.io/gh/stacksjs/ts-cache -->

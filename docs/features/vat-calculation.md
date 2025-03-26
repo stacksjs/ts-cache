@@ -5,7 +5,7 @@ Learn how to calculate VAT rates for different scenarios in the EU.
 ## Basic Calculation
 
 ```typescript
-import { VatCalculator } from 'ts-vat'
+import { VatCalculator } from 'ts-cache'
 
 const calculator = new VatCalculator()
 

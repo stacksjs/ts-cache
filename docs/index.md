@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "ts-vat"
+  name: "ts-cache"
   text: "EU VAT Calculator"
   tagline: "Easily handle EU MOSS tax & VAT regulations in TypeScript."
   image: /images/logo-white.png
@@ -13,7 +13,7 @@ hero:
       link: /intro
     - theme: alt
       text: View on GitHub
-      link: https://github.com/stacksjs/ts-vat
+      link: https://github.com/stacksjs/ts-cache
 
 features:
   - title: "Complete EU VAT Rules"

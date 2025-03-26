@@ -7,7 +7,7 @@ Explore advanced features and configurations of the VAT calculator.
 Define custom VAT rules for specific scenarios:
 
 ```typescript
-import { VatCalculator, VatRules } from 'ts-vat'
+import { VatCalculator, VatRules } from 'ts-cache'
 
 const customRules: VatRules = {
   DE: {
@@ -32,7 +32,7 @@ const calculator = new VatCalculator({
 Implement your own VAT number validation service:
 
 ```typescript
-import { VatCalculator, VatValidationService } from 'ts-vat'
+import { VatCalculator, VatValidationService } from 'ts-cache'
 
 class CustomVatService implements VatValidationService {
   async validateVat(countryCode: string, vatNumber: string) {
@@ -62,7 +62,7 @@ const calculator = new VatCalculator({
 
 ```typescript
 import express from 'express'
-import { VatCalculator } from 'ts-vat'
+import { VatCalculator } from 'ts-cache'
 
 const app = express()
 const calculator = new VatCalculator()
@@ -115,7 +115,7 @@ import {
   VatCalculator,
   VatCalculatorException,
   VatCheckUnavailableException
-} from 'ts-vat'
+} from 'ts-cache'
 
 class VatErrorHandler {
   private calculator: VatCalculator
@@ -174,7 +174,7 @@ class VatErrorHandler {
 
 ```typescript
 import NodeCache from 'node-cache'
-import { VatCalculator } from 'ts-vat'
+import { VatCalculator } from 'ts-cache'
 
 class CachedVatCalculator {
   private calculator: VatCalculator
@@ -247,7 +247,7 @@ class CachedVatCalculator {
 ### Test Helpers
 
 ```typescript
-import { VatCalculator } from 'ts-vat'
+import { VatCalculator } from 'ts-cache'
 
 export class VatTestHelper {
   static createMockCalculator(options = {}) {

@@ -1,6 +1,6 @@
 # Installation
 
-ts-vat is available as an npm package and can be installed using your preferred package manager.
+ts-cache is available as an npm package and can be installed using your preferred package manager.
 
 ## Package Managers
 
@@ -9,21 +9,21 @@ Choose your package manager of choice:
 ::: code-group
 
 ```sh [npm]
-npm install ts-vat
+npm install ts-cache
 # or install with TypeScript types
-npm install ts-vat @types/ts-vat
+npm install ts-cache @types/ts-cache
 ```
 
 ```sh [bun]
-bun install ts-vat
+bun install ts-cache
 ```
 
 ```sh [pnpm]
-pnpm add ts-vat
+pnpm add ts-cache
 ```
 
 ```sh [yarn]
-yarn add ts-vat
+yarn add ts-cache
 ```
 
 :::
@@ -53,7 +53,7 @@ If you're using TypeScript, make sure your `tsconfig.json` includes the followin
 
 ### VIES Service Access
 
-ts-vat uses the EU's VIES (VAT Information Exchange System) service for VAT number validation. Make sure your environment has:
+ts-cache uses the EU's VIES (VAT Information Exchange System) service for VAT number validation. Make sure your environment has:
 
 1. Access to the internet
 2. No firewall blocking access to `ec.europa.eu`
@@ -61,7 +61,7 @@ ts-vat uses the EU's VIES (VAT Information Exchange System) service for VAT numb
 
 ### Timeouts
 
-By default, ts-vat sets a 30-second timeout for VIES service calls. You can configure this in your initialization:
+By default, ts-cache sets a 30-second timeout for VIES service calls. You can configure this in your initialization:
 
 ```typescript
 const calculator = new VatCalculator({
