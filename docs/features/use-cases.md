@@ -75,7 +75,7 @@ Implement a simple rate limiter:
 ```typescript
 function isRateLimited(ip, limit = 100, period = 3600) {
   const key = `ratelimit:${ip}`
-  let attempts = cache.get<number>(key) || 0
+  const attempts = cache.get<number>(key) || 0
 
   if (attempts >= limit) {
     return true // Rate limited
