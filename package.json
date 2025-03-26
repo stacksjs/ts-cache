@@ -1,5 +1,5 @@
 {
-  "name": "ts-cache",
+  "name": "@stacksjs/ts-cache",
   "type": "module",
   "version": "0.1.0",
   "description": "Simple and fast TypeScript in-memory caching. Modern TypeScript port of node-cache.",
