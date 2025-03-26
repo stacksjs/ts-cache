@@ -1,0 +1,79 @@
+{
+  "name": "ts-cache",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Simple and fast TypeScript in-memory caching. Modern TypeScript port of node-cache.",
+  "author": "Chris Breuer <chris@stacksjs.org>",
+  "license": "MIT",
+  "homepage": "https://github.com/stacksjs/ts-cache#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stacksjs/ts-cache.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stacksjs/ts-cache/issues"
+  },
+  "keywords": [
+    "typescript",
+    "cache",
+    "caching",
+    "memory",
+    "internal",
+    "local",
+    "node",
+    "in-memory",
+    "library",
+    "memcached",
+    "object"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": {
+      "import": "./dist/*"
+    }
+  },
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["README.md", "dist"],
+  "scripts": {
+    "build": "bun --bun build.ts",
+    "lint": "bunx --bun eslint .",
+    "lint:fix": "bunx --bun eslint . --fix",
+    "fresh": "bunx rimraf node_modules/ bun.lock && bun i",
+    "changelog": "bunx changelogen --output CHANGELOG.md",
+    "prepublishOnly": "bun --bun run build",
+    "release": "bun run changelog && bunx bumpp package.json --all",
+    "test": "bun test",
+    "dev:docs": "bun --bun vitepress dev docs",
+    "build:docs": "bun --bun vitepress build docs",
+    "preview:docs": "bun --bun vitepress preview docs",
+    "typecheck": "bun --bun tsc --noEmit"
+  },
+  "dependencies": {
+    "@types/clone": "^2.1.4",
+    "clone": "^2.1.2"
+  },
+  "devDependencies": {
+    "@stacksjs/docs": "^0.70.10",
+    "@stacksjs/eslint-config": "^4.10.2-beta.3",
+    "@types/bun": "^1.2.5",
+    "@types/xmldom": "^0.1.34",
+    "@xmldom/xmldom": "^0.9.8",
+    "bumpp": "^10.1.0",
+    "bun-plugin-dtsx": "^0.21.9",
+    "bunfig": "^0.8.2",
+    "changelogen": "^0.6.1",
+    "lint-staged": "^15.5.0",
+    "simple-git-hooks": "^2.12.1",
+    "typescript": "^5.8.2"
+  },
+  "overrides": {
+    "unconfig": "0.3.10"
+  },
+  "lint-staged": {
+    "*.{js,ts}": "bunx --bun eslint . --fix"
+  }
+}
