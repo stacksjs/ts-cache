@@ -6,7 +6,7 @@
 <!-- [![npm downloads][npm-downloads-src]][npm-downloads-href] -->
 <!-- [![Codecov][codecov-src]][codecov-href] -->
 
-# TS-Cache
+# ts-cache
 
 Simple and fast TypeScript in-memory caching. A modern TypeScript port of the popular [node-cache](https://github.com/node-cache/node-cache) library.
 
@@ -246,113 +246,6 @@ cache.on('flush_stats', () => {
 | `flushStats()` | Reset statistics |
 | `close()` | Stop the check timer |
 
-## License
-
-MIT
-
-## Features
-
-- Calculate VAT for all EU countries
-- Support for different VAT rates (standard, reduced, super-reduced)
-- VAT number validation through VIES
-- Special VAT zones and exceptions handling
-- B2B and B2C VAT calculations
-- TypeScript support with full type safety
-
-## Installation
-
-```bash
-npm install ts-cache
-```
-
-## Usage
-
-### Basic VAT Calculation
-
-```typescript
-import { VatCalculator } from 'ts-cache'
-
-const calculator = new VatCalculator()
-
-// Calculate VAT for a net price
-const result = calculator.calculate(100, 'DE') // Germany
-console.log(result)
-// {
-//   netPrice: 100,
-//   grossPrice: 119,
-//   vatAmount: 19,
-//   vatRate: 0.19,
-//   countryCode: 'DE',
-//   isCompany: false
-// }
-
-// Calculate net price from gross price
-const netResult = calculator.calculateNet(119, 'DE')
-console.log(netResult.netPrice) // 100
-```
-
-### B2B Transactions
-
-```typescript
-const calculator = new VatCalculator({
-  businessCountryCode: 'DE'
-})
-
-// B2B transaction within same country
-const result = calculator.calculate(100, 'DE', undefined, true)
-console.log(result.vatRate) // 0
-
-// B2B transaction with different country
-const result2 = calculator.calculate(100, 'FR', undefined, true)
-console.log(result2.vatRate) // 0.20
-```
-
-### VAT Number Validation
-
-```typescript
-const calculator = new VatCalculator()
-
-// Check if VAT number is valid
-const isValid = await calculator.isValidVatNumber('DE123456789')
-console.log(isValid)
-
-// Get detailed VAT number information
-const details = await calculator.getVatDetails('DE123456789')
-console.log(details)
-// {
-//   isValid: true,
-//   name: 'Company Name',
-//   address: 'Company Address',
-//   countryCode: 'DE',
-//   vatNumber: '123456789'
-// }
-```
-
-### Special VAT Zones
-
-```typescript
-const calculator = new VatCalculator()
-
-// Calculate VAT for Heligoland (Germany)
-const result = calculator.calculate(100, 'DE', 'Heligoland')
-console.log(result.vatRate) // 0
-```
-
-## Configuration
-
-You can configure the calculator with custom options:
-
-```typescript
-const calculator = new VatCalculator({
-  businessCountryCode: 'DE',
-  forwardSoapFaults: true,
-  soapTimeout: 5000, // 5 seconds
-  rules: {
-    // Custom VAT rules...
-  }
-})
-```
-
 ## Testing
 
 ```bash
@@ -392,7 +285,6 @@ We would like to extend our thanks to the following sponsors for funding Stacks 
 
 ## Credits
 
-- [`vat-calculator`](https://github.com/driesvints/vat-calculator) _for the original PHP implementation_
 - [Chris Breuer](https://github.com/chrisbbreuer)
 - [All Contributors](https://github.com/stacksjs/ts-cache/contributors)
 

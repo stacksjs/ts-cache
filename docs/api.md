@@ -1,288 +1,447 @@
 # API Reference
 
-## VatCalculator Class
+## Cache Class
 
-The main class for handling VAT calculations and validations.
+The main class for handling in-memory caching operations.
 
 ### Constructor
 
 ```typescript
-constructor(config: Partial<VatCalculatorConfig> = {})
+constructor(options: Options = {})
 ```
 
-Creates a new VAT calculator instance with optional configuration.
+Creates a new cache instance with optional configuration.
 
 #### Configuration Options
 
 ```typescript
-interface VatCalculatorConfig {
-  businessCountryCode?: CountryCode
-  validateVatNumbers?: boolean
-  validatePostalCodes?: boolean
-  validateCountryCodes?: boolean
-  forwardSoapFaults?: boolean
-  soapTimeout?: number
-  rules?: VatRules
+interface Options {
+  forceString?: boolean
+  objectValueSize?: number
+  promiseValueSize?: number
+  arrayValueSize?: number
+  stdTTL?: number
+  checkperiod?: number
+  useClones?: boolean
+  deleteOnExpire?: boolean
+  enableLegacyCallbacks?: boolean
+  maxKeys?: number
 }
 ```
 
 ### Core Methods
 
-#### calculate
+#### get
 
 ```typescript
-calculate(
-  netPrice: number,
-  countryCode?: CountryCode,
-  postalCode?: string,
-  company: boolean = false,
-  type?: VatRateType
-): VatCalculationResult
+get<T>(key: Key): T | undefined
 ```
 
-Calculates VAT for a given price and location.
+Retrieves a value from the cache. Returns `undefined` if the key doesn't exist or has expired.
+
+**Parameters:**
+
+- `key` (string | number): The key to retrieve
+- Generic type `T`: The expected type of the retrieved value
 
 **Returns:**
 
-```typescript
-interface VatCalculationResult {
-  netPrice: number
-  grossPrice: number
-  vatAmount: number
-  vatRate: number
-  countryCode: CountryCode
-  isCompany: boolean
-  details: {
-    ruleApplied: VatRateType
-    reverseCharge: boolean
-    vatNumberUsed?: string
-    postalCodeUsed?: string
-  }
-}
-```
+- The stored value or `undefined` if not found
 
-#### calculateNet
+**Example:**
 
 ```typescript
-calculateNet(
-  grossPrice: number,
-  countryCode?: CountryCode,
-  postalCode?: string,
-  company: boolean = false,
-  type?: VatRateType
-): VatCalculationResult
+const value = cache.get<string>('myKey')
 ```
 
-Calculates the net price from a gross price.
-
-### VAT Number Methods
-
-#### isValidVatNumber
+#### set
 
 ```typescript
-async isValidVatNumber(vatNumber: string): Promise<boolean>
+set<T>(key: Key, value: T, ttl?: number | string): boolean
 ```
 
-Validates a VAT number against the VIES service.
+Sets a value in the cache with an optional Time To Live (TTL).
 
-#### getVatDetails
+**Parameters:**
 
-```typescript
-async getVatDetails(vatNumber: string): Promise<VatNumberValidationResult>
-```
-
-Gets detailed information about a VAT number.
+- `key` (string | number): The key to store the value under
+- `value` (any): The value to store
+- `ttl` (number | string, optional): Time to live in seconds. `0` means unlimited
 
 **Returns:**
 
+- `true` if the operation was successful
+
+**Example:**
+
 ```typescript
-interface VatNumberValidationResult {
-  isValid: boolean
-  name?: string
-  address?: string
-  countryCode?: CountryCode
-  vatNumber?: string
-  isCompany: boolean
+cache.set('myKey', 'myValue', 60) // Expire after 60 seconds
+```
+
+#### mget
+
+```typescript
+mget<T>(keys: Key[]): { [key: string]: T }
+```
+
+Retrieves multiple values from the cache at once.
+
+**Parameters:**
+
+- `keys` (array): An array of keys to retrieve
+- Generic type `T`: The expected type of the retrieved values
+
+**Returns:**
+
+- An object with the requested keys as properties and their values
+
+**Example:**
+
+```typescript
+const values = cache.mget<string>(['key1', 'key2', 'key3'])
+```
+
+#### mset
+
+```typescript
+mset<T>(keyValueSet: ValueSetItem<T>[]): boolean
+```
+
+Sets multiple values in the cache at once.
+
+**Parameters:**
+
+- `keyValueSet` (array): An array of objects containing key, value, and optional ttl
+
+**Returns:**
+
+- `true` if the operation was successful
+
+**Interface:**
+
+```typescript
+interface ValueSetItem<T> {
+  key: Key
+  val: T
+  ttl?: number
 }
 ```
 
-### Setter Methods
-
-#### setCountryCode
+**Example:**
 
 ```typescript
-setCountryCode(countryCode: CountryCode): this
+cache.mset([
+  { key: 'key1', val: 'value1' },
+  { key: 'key2', val: 'value2', ttl: 100 }
+])
 ```
 
-Sets the country code for VAT calculations.
-
-#### setPostalCode
+#### del
 
 ```typescript
-setPostalCode(postalCode: string): this
+del(keys: Key | Key[]): number
 ```
 
-Sets the postal code for VAT calculations.
+Deletes one or more keys from the cache.
 
-#### setCompany
+**Parameters:**
+
+- `keys` (string | number | array): A key or array of keys to delete
+
+**Returns:**
+
+- The number of deleted keys
+
+**Example:**
 
 ```typescript
-setCompany(company: boolean): this
+const deletedCount = cache.del(['key1', 'key2'])
 ```
 
-Sets whether the customer is a business.
-
-#### setVatNumber
+#### has
 
 ```typescript
-setVatNumber(vatNumber: string): this
+has(key: Key): boolean
 ```
 
-Sets the VAT number for the calculation.
+Checks if a key exists in the cache and hasn't expired.
 
-#### setBusinessCountryCode
+**Parameters:**
+
+- `key` (string | number): The key to check
+
+**Returns:**
+
+- `true` if the key exists and is valid, `false` otherwise
+
+**Example:**
 
 ```typescript
-setBusinessCountryCode(businessCountryCode: CountryCode): this
+if (cache.has('myKey')) {
+  // Key exists and is not expired
+}
 ```
 
-Sets the business country code.
-
-### Getter Methods
-
-#### getNetPrice
+#### keys
 
 ```typescript
-getNetPrice(): number
+keys(): string[]
 ```
 
-Gets the current net price.
+Lists all keys stored in the cache.
 
-#### getCountryCode
+**Returns:**
+
+- An array of all keys
+
+**Example:**
 
 ```typescript
-getCountryCode(): CountryCode | undefined
+const allKeys = cache.keys()
 ```
 
-Gets the current country code.
-
-#### getPostalCode
+#### take
 
 ```typescript
-getPostalCode(): string | undefined
+take<T>(key: Key): T | undefined
 ```
 
-Gets the current postal code.
+Gets a cached value and removes it from the cache in one operation.
 
-#### isCompany
+**Parameters:**
+
+- `key` (string | number): The key to retrieve and delete
+- Generic type `T`: The expected type of the retrieved value
+
+**Returns:**
+
+- The stored value or `undefined` if not found
+
+**Example:**
 
 ```typescript
-isCompany(): boolean
+const value = cache.take<string>('myKey')
 ```
 
-Gets whether the customer is a business.
-
-#### getVatNumber
+#### ttl
 
 ```typescript
-getVatNumber(): string | undefined
+ttl(key: Key, ttl?: number): boolean
 ```
 
-Gets the current VAT number.
+Resets or modifies the TTL of an existing cache key.
 
-### Utility Methods
+**Parameters:**
 
-#### shouldCollectVat
+- `key` (string | number): The cache key
+- `ttl` (number, optional): The new TTL in seconds. Default is the stdTTL
+
+**Returns:**
+
+- `true` if the key exists and TTL was updated, `false` otherwise
+
+**Example:**
 
 ```typescript
-shouldCollectVat(countryCode: CountryCode): boolean
+cache.ttl('myKey', 300) // Reset TTL to 300 seconds
 ```
 
-Determines whether VAT should be collected for a given country.
-
-#### getTaxRateForCountry
+#### getTtl
 
 ```typescript
-getTaxRateForCountry(
-  countryCode: CountryCode,
-  company: boolean = false,
-  type?: VatRateType
-): number
+getTtl(key: Key): number | undefined
 ```
 
-Gets the VAT rate for a specific country.
+Gets the remaining TTL for a cache key.
 
-#### getTaxRateForLocation
+**Parameters:**
+
+- `key` (string | number): The cache key
+
+**Returns:**
+
+- Timestamp in milliseconds when the key will expire, `0` for infinite TTL, or `undefined` if the key doesn't exist
+
+**Example:**
 
 ```typescript
-getTaxRateForLocation(
-  countryCode: CountryCode,
-  postalCode?: string,
-  company: boolean = false,
-  type?: VatRateType
-): number
+const expireTime = cache.getTtl('myKey')
 ```
 
-Gets the VAT rate for a specific location, considering special territories.
+#### fetch
+
+```typescript
+fetch<T>(key: Key, ttlOrValue: number | string | (() => T) | T, value?: (() => T) | T): T
+```
+
+Gets a value from cache or computes and stores it if not present.
+
+**Parameters:**
+
+- `key` (string | number): The cache key
+- `ttlOrValue`: Either a TTL value or the value/function to store
+- `value` (optional): The value/function to store (if first param is TTL)
+
+**Returns:**
+
+- The fetched or computed value
+
+**Example:**
+
+```typescript
+// With a value
+const result = cache.fetch('myKey', 'myValue')
+
+// With a function that computes the value
+const result = cache.fetch('myKey', () => computeExpensiveValue())
+
+// With TTL and a value
+const result = cache.fetch('myKey', 60, 'myValue')
+```
+
+#### flushAll
+
+```typescript
+flushAll(): void
+```
+
+Clears all data from the cache and resets the stats.
+
+**Example:**
+
+```typescript
+cache.flushAll()
+```
+
+#### flushStats
+
+```typescript
+flushStats(): void
+```
+
+Resets all cache statistics counters.
+
+**Example:**
+
+```typescript
+cache.flushStats()
+```
+
+#### getStats
+
+```typescript
+getStats(): Stats
+```
+
+Gets the current cache statistics.
+
+**Returns:**
+
+- A Stats object with hit/miss counts, key count, and size information
+
+**Interface:**
+
+```typescript
+interface Stats {
+  hits: number
+  misses: number
+  keys: number
+  ksize: number
+  vsize: number
+}
+```
+
+**Example:**
+
+```typescript
+const stats = cache.getStats()
+```
+
+#### close
+
+```typescript
+close(): void
+```
+
+Stops the automatic cleanup interval.
+
+**Example:**
+
+```typescript
+cache.close()
+```
+
+### Events
+
+The Cache class extends EventEmitter and emits the following events:
+
+- `set` - Emitted when a key is set (Parameters: key, value)
+- `del` - Emitted when a key is deleted (Parameters: key, value)
+- `expired` - Emitted when a key expires (Parameters: key, value)
+- `flush` - Emitted when cache is flushed
+- `flush_stats` - Emitted when stats are flushed
+
+**Example:**
+
+```typescript
+cache.on('expired', (key, value) => {
+  console.log(`Key ${key} expired with value:`, value)
+})
+```
+
+## Default Export
+
+The library exports a default pre-configured cache instance for convenience:
+
+```typescript
+import cache from 'ts-cache'
+
+cache.set('key', 'value')
+```
 
 ## Types
 
-### CountryCode
+### Key
 
 ```typescript
-type CountryCode = 'AT' | 'BE' | 'BG' | 'CY' | 'CZ' | 'DE' | 'DK' | 'EE' | 'EL' |
-  'ES' | 'FI' | 'FR' | 'GB' | 'HR' | 'HU' | 'IE' | 'IT' | 'LT' | 'LU' | 'LV' |
-  'MT' | 'NL' | 'PL' | 'PT' | 'RO' | 'SE' | 'SI' | 'SK'
+type Key = string | number
 ```
 
-### VatRateType
+Keys can be either strings or numbers.
+
+### Data
 
 ```typescript
-type VatRateType = 'standard' | 'reduced' | 'super-reduced' | 'parking' | 'high' | 'low'
-```
-
-### VatRules
-
-```typescript
-interface VatRules {
-  [key: string]: CountryVatRule
-}
-
-interface CountryVatRule {
-  rate: number
-  rates?: {
-    [key in VatRateType]?: number
-  }
-  specialRules?: {
-    vatNumberRequired?: boolean
-    reverseCharge?: boolean
-  }
+interface Data {
+  [key: string]: WrappedValue<any>
 }
 ```
 
-## Exceptions
+Internal storage container for cached data.
 
-The library throws the following exceptions:
+### WrappedValue
 
-### VatCalculatorException
+```typescript
+interface WrappedValue<T> {
+  t: number // TTL timestamp
+  v: T      // Value
+}
+```
 
-Base exception class for all VAT calculator errors.
+Internal wrapper for cached values with metadata.
 
-### InvalidCountryCodeException
+### CacheError
 
-Thrown when an invalid country code is provided.
+```typescript
+interface CacheError extends Error {
+  name: string
+  errorcode: string
+  message: string
+  data: any
+}
+```
 
-### InvalidPostalCodeException
-
-Thrown when an invalid postal code format is provided.
-
-### InvalidVatNumberException
-
-Thrown when an invalid VAT number format is provided.
-
-### VatCheckUnavailableException
-
-Thrown when the VIES VAT validation service is unavailable.
+Extended error type returned by cache operations.
 
 ## Usage Examples
 

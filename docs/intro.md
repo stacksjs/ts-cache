@@ -1,53 +1,54 @@
-<p align="center"><img src="https://github.com/stacksjs/ts-cache/blob/main/.github/art/cover.jpg?raw=true" alt="Social Card of this repo"></p>
+<p align="center"><img src="https://github.com/stacksjs/ts-cache/blob/main/.github/art/cover.jpg?raw=true" alt="Social Card of ts-cache"></p>
 
 # Introduction
 
-ts-cache is a powerful TypeScript library designed to handle EU VAT calculations and validations with precision and ease. It provides a comprehensive solution for businesses dealing with European Union Value Added Tax regulations, including special cases, reduced rates, and post-Brexit UK rules.
+ts-cache is a powerful TypeScript in-memory caching library designed to improve application performance by storing frequently accessed data in memory. This modern TypeScript port of the popular [node-cache](https://github.com/node-cache/node-cache) library provides a clean, type-safe API with enhanced features optimized for modern JavaScript/TypeScript applications.
 
 ## Features
 
-### 🇪🇺 Complete EU VAT Coverage
+### 🚀 High Performance
 
-- Support for all EU member states
-- Post-Brexit UK VAT rules
-- Special territories and exceptions
-- Reduced rates and parking rates
-- Reverse charge mechanism
-
-### ✅ Comprehensive Validation
-
-- VAT number validation against official VIES service
-- Postal code validation for all EU countries
-- Country code validation
-- Detailed error messages and handling
-
-### 🎯 Special Cases
-
-- Support for special territories (e.g., Canary Islands, Mount Athos)
-- Handling of B2B and B2C transactions
-- Cross-border transaction rules
-- Reverse charge mechanism
+- Optimized for speed with minimal overhead
+- Smart memory management with adjustable limits
+- Configurable time-to-live (TTL) for cached items
+- Automatic cleanup of expired items
 
 ### 🛡️ Type Safety
 
-- Full TypeScript support
-- Comprehensive type definitions
-- Compile-time checks
-- IDE autocompletion
+- Full TypeScript support with comprehensive type definitions
+- Generic methods for type-safe value retrieval
+- IDE autocompletion for better developer experience
+- Compile-time checking
 
-### 🔧 Flexible Configuration
+### 🔄 Flexible API
 
-- Customizable validation rules
-- Configurable timeouts
-- Error handling options
-- Business country settings
+- Simple get/set API for basic caching needs
+- Fetch API for compute-if-absent pattern
+- Multiple key operations (mget/mset/del)
+- TTL management for fine-grained expiration control
 
-## Browser Compatibility
+### 📊 Monitoring & Events
 
-ts-cache is designed to work in both Node.js / Bun and modern browser environments. Here's what you need to know:
+- Built-in statistics for cache performance monitoring
+- Event emitter for cache operations (set, del, expired, etc.)
+- Memory usage estimation
+- Comprehensive error handling
 
-### Modern Browsers
+### 🔧 Configurable
 
+- Customizable TTL for each cached item
+- Memory limits with max keys setting
+- Clone behavior configuration
+- Automatic cleanup interval adjustment
+
+## Browser & Node.js Compatibility
+
+ts-cache is designed to work in both Node.js and modern browser environments:
+
+### Modern Environments
+
+- Node.js 14+
+- Bun 1.0+
 - Chrome 61+
 - Firefox 60+
 - Safari 11+
@@ -55,83 +56,72 @@ ts-cache is designed to work in both Node.js / Bun and modern browser environmen
 
 ### Key Considerations
 
-- The library uses the `fetch` API for VIES service communication
-- XML parsing is handled via the `@xmldom/xmldom` package
-- All modern ES6+ features are transpiled for broader compatibility
-- The library is tree-shakeable for optimal bundle size
-
-### CORS Considerations
-
-When using the library in a browser environment, you may need to handle CORS for VIES service calls. We recommend:
-
-1. Using a CORS proxy in development
-2. Setting up proper backend proxying in production
-3. Implementing request caching for better performance
+- The library uses ES modules for better tree shaking
+- TypeScript declarations enable great IDE integration
+- Event-based architecture for reactive applications
+- Minimal dependencies (only requires `clone` package)
 
 ## Performance Optimization
 
 ts-cache is optimized for:
 
-1. **Tree Shaking**: Only import what you need
-2. **Caching**: Implement response caching for VAT validations
-3. **Lazy Loading**: Import validation features on demand
-4. **Bundle Size**: Core package is under 10KB minified and gzipped
+1. **Memory Efficiency**: Customizable size estimators for different data types
+2. **Speed**: Minimal overhead for cache operations
+3. **Configurability**: Adjust settings based on your specific use case
+4. **Monitoring**: Track hits, misses, and other stats to optimize usage
 
 ## Use Cases
 
 ts-cache is perfect for:
 
-- E-commerce platforms
-- SaaS businesses
-- Digital service providers
-- Accounting software
-- Invoice generation systems
-- Tax compliance tools
+- API response caching
+- Expensive computation results caching
+- Database query result caching
+- Session data storage
+- Application configuration caching
+- Rate limiting implementation
+- Memoization of function results
 
 ## Real-World Example
 
-Here's a quick example of calculating VAT for a product sold to a customer in Germany:
+Here's a quick example of using ts-cache to improve API response times:
 
 ```typescript
-import { VatCalculator } from 'ts-cache'
+import { cache } from 'ts-cache'
+import { fetchUserData } from './api'
 
-const calculator = new VatCalculator({
-  businessCountryCode: 'DE',
-  validateVatNumbers: true,
-})
+// Function that uses cache for API responses
+async function getUserData(userId: string) {
+  // Check if data is already in cache
+  const cachedData = cache.get<UserData>(userId)
+  if (cachedData) {
+    return cachedData
+  }
 
-// Calculate VAT for a €100 product sold to a business customer in Germany
-const result = calculator.calculate(
-  100,
-  'DE',
-  '10115', // Berlin postal code
-  true, // is business customer
-)
+  // If not in cache, fetch from API
+  const userData = await fetchUserData(userId)
 
-console.log(result)
-// Output:
-// {
-//   netPrice: 100,
-//   grossPrice: 119,
-//   vatAmount: 19,
-//   vatRate: 0.19,
-//   countryCode: 'DE',
-//   isCompany: true,
-//   details: {
-//     ruleApplied: 'standard',
-//     reverseCharge: true,
-//     vatNumberUsed: undefined,
-//     postalCodeUsed: '10115'
-//   }
-// }
+  // Store in cache for 5 minutes
+  cache.set(userId, userData, 300)
+
+  return userData
+}
+
+// Or using the built-in fetch method
+async function getUserDataWithFetch(userId: string) {
+  return cache.fetch(userId, 300, async () => {
+    return await fetchUserData(userId)
+  })
+}
 ```
 
 ## Why ts-cache?
 
-1. **Accuracy**: Built with precision in mind, following official EU VAT rules and regulations
-2. **Type Safety**: Full TypeScript support ensures compile-time error catching
-3. **Validation**: Built-in validation for VAT numbers, postal codes, and country codes
-4. **Maintenance**: Regular updates to keep up with VAT rate changes and regulation updates
-5. **Performance**: Optimized for high-performance applications with minimal overhead
+1. **Modern**: Built with TypeScript for modern applications
+2. **Type-Safe**: Full type safety with generics for better developer experience
+3. **Lightweight**: Minimal dependencies and small footprint
+4. **Flexible**: Works in Node.js, Bun, and browser environments
+5. **Performant**: Optimized for speed and memory efficiency
+6. **Maintained**: Regular updates and improvements
 
 Ready to get started? Check out our [Installation Guide](./install.md) or dive into the [Usage Documentation](./usage.md).

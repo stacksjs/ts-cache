@@ -1,15 +1,15 @@
 # Configuration
 
-ts-cache provides extensive configuration options to customize its behavior according to your needs. Here's a complete guide to all available configuration options.
+ts-cache provides several configuration options to customize the behavior of the cache according to your needs. This guide explains all available options in detail.
 
 ## Basic Configuration
 
-The `VatCalculator` constructor accepts a configuration object that allows you to customize its behavior:
+The `Cache` constructor accepts a configuration object that allows you to customize its behavior:
 
 ```typescript
-import { VatCalculator } from 'ts-cache'
+import { Cache } from 'ts-cache'
 
-const calculator = new VatCalculator({
+const cache = new Cache({
   // Your configuration options here
 })
 ```
@@ -19,250 +19,222 @@ const calculator = new VatCalculator({
 ### Core Settings
 
 ```typescript
-interface VatCalculatorConfig {
-  // The country code where your business is located
-  businessCountryCode?: CountryCode
+interface Options {
+  // Convert all elements to string
+  forceString?: boolean
 
-  // VAT rules for different countries
-  rules?: VatRules
+  // Used for calculating value size
+  objectValueSize?: number
+  promiseValueSize?: number
+  arrayValueSize?: number
 
-  // Validation settings
-  validateVatNumbers?: boolean
-  validatePostalCodes?: boolean
-  validateCountryCodes?: boolean
+  // Standard time to live in seconds. 0 = infinity
+  stdTTL?: number
 
-  // VIES service settings
-  forwardSoapFaults?: boolean
-  soapTimeout?: number
+  // Time in seconds to check all data and delete expired keys
+  checkperiod?: number
+
+  // Whether to clone values when setting/getting
+  useClones?: boolean
+
+  // Whether values should be deleted automatically at expiration
+  deleteOnExpire?: boolean
+
+  // Enable legacy callbacks (deprecated)
+  enableLegacyCallbacks?: boolean
+
+  // Max amount of keys that are being stored. -1 = unlimited
+  maxKeys?: number
 }
 ```
 
-### VAT Rules Configuration
+## Default Values
+
+ts-cache comes with sensible defaults for all options:
 
 ```typescript
-interface VatRules {
-  [countryCode: string]: {
-    // Standard VAT rate for the country
-    rate: number
-
-    // Different types of VAT rates
-    rates?: {
-      'high': number
-      'low'?: number
-      'low1'?: number
-      'super-reduced'?: number
-      'parking'?: number
-    }
-
-    // Special territory exceptions
-    exceptions?: {
-      [territory: string]: number
-    }
-
-    // Special rules for the country
-    specialRules?: {
-      isCompanyRequired?: boolean
-      reverseCharge?: boolean
-      vatNumberRequired?: boolean
-    }
-
-    // Postal code based rules
-    postalCodeRules?: Array<{
-      pattern: RegExp | string
-      rate: number
-    }>
-  }
+{
+  forceString: false,
+  objectValueSize: 80,
+  promiseValueSize: 80,
+  arrayValueSize: 40,
+  stdTTL: 0,
+  checkperiod: 600,
+  useClones: true,
+  deleteOnExpire: true,
+  enableLegacyCallbacks: false,
+  maxKeys: -1
 }
 ```
 
-## Example Configurations
+## Options in Detail
 
-### Basic Setup
+### Time-To-Live Settings
+
+#### `stdTTL`
+
+Standard Time-To-Live in seconds. Items that are set without an explicit TTL value will use this value.
+
+- Type: `number`
+- Default: `0` (infinity)
+- Example:
 
 ```typescript
-const calculator = new VatCalculator({
-  businessCountryCode: 'DE',
-  validateVatNumbers: true,
-  validatePostalCodes: true,
-  validateCountryCodes: true,
+const cache = new Cache({
+  stdTTL: 3600 // Items expire after 1 hour by default
 })
 ```
 
-### Custom VAT Rules
+#### `checkperiod`
+
+The interval in seconds to check for expired items. A cleanup process runs at this interval to remove expired items.
+
+- Type: `number`
+- Default: `600` (10 minutes)
+- Example:
 
 ```typescript
-const calculator = new VatCalculator({
-  rules: {
-    DE: {
-      rate: 0.19,
-      rates: {
-        high: 0.19,
-        low: 0.07,
-      },
-      exceptions: {
-        'Heligoland': 0,
-        'Büsingen am Hochrhein': 0,
-      },
-    },
-    // ... other country rules
-  },
+const cache = new Cache({
+  checkperiod: 300 // Check for expired items every 5 minutes
 })
 ```
 
-### VIES Service Configuration
+### Memory Management
+
+#### `maxKeys`
+
+The maximum number of keys that can be stored in the cache. If this limit is reached, a `ECACHEFULL` error will be thrown when attempting to add new keys.
+
+- Type: `number`
+- Default: `-1` (unlimited)
+- Example:
 
 ```typescript
-const calculator = new VatCalculator({
-  forwardSoapFaults: true,
-  soapTimeout: 15000, // 15 seconds
+const cache = new Cache({
+  maxKeys: 1000 // Limit the cache to 1000 keys
 })
 ```
 
-## Default Configuration
+#### Value Size Estimators
 
-ts-cache comes with sensible defaults that you can override as needed:
+The cache keeps track of approximate memory usage through several size estimators:
 
-```typescript
-const defaultConfig = {
-  rules: defaultVatRules, // Includes all EU country rules
-  businessCountryCode: undefined,
-  forwardSoapFaults: false,
-  soapTimeout: 30000, // 30 seconds
-  validateVatNumbers: true,
-  validateCountryCodes: true,
-  validatePostalCodes: false,
-}
-```
+- `objectValueSize`: Estimated size for each property in an object (default: `80`)
+- `arrayValueSize`: Estimated size for each element in an array (default: `40`)
+- `promiseValueSize`: Estimated size for a Promise (default: `80`)
 
-## Validation Settings
-
-### VAT Number Validation
+Example:
 
 ```typescript
-const calculator = new VatCalculator({
-  validateVatNumbers: true, // Enable VAT number format validation
+const cache = new Cache({
+  objectValueSize: 100, // Custom object size estimator
+  arrayValueSize: 50 // Custom array size estimator
 })
 ```
 
-### Postal Code Validation
+### Data Handling Options
+
+#### `forceString`
+
+When enabled, all values are converted to strings using `JSON.stringify()` before storing.
+
+- Type: `boolean`
+- Default: `false`
+- Example:
 
 ```typescript
-const calculator = new VatCalculator({
-  validatePostalCodes: true, // Enable postal code format validation
+const cache = new Cache({
+  forceString: true // Convert all values to strings
 })
 ```
 
-### Country Code Validation
+#### `useClones`
+
+When enabled, the cache returns clones of the stored values rather than references. This prevents unintended modifications to cached data but can impact performance.
+
+- Type: `boolean`
+- Default: `true`
+- Example:
 
 ```typescript
-const calculator = new VatCalculator({
-  validateCountryCodes: true, // Enable country code validation
+const cache = new Cache({
+  useClones: false // Return references to stored values for better performance
 })
 ```
 
-## Special Rules
+#### `deleteOnExpire`
 
-### Reverse Charge
+Controls whether expired items are automatically removed from the cache when they are accessed or during the periodic cleanup.
+
+- Type: `boolean`
+- Default: `true`
+- Example:
 
 ```typescript
-const calculator = new VatCalculator({
-  rules: {
-    DE: {
-      // ... other rules
-      specialRules: {
-        reverseCharge: true,
-      },
-    },
-  },
+const cache = new Cache({
+  deleteOnExpire: false // Keep expired items in the cache
 })
 ```
 
-### VAT Number Requirements
+### Legacy Options
+
+#### `enableLegacyCallbacks`
+
+Enables support for old-style callback functions. This is deprecated and will be removed in future versions.
+
+- Type: `boolean`
+- Default: `false`
+- Example:
 
 ```typescript
-const calculator = new VatCalculator({
-  rules: {
-    GB: {
-      // ... other rules
-      specialRules: {
-        vatNumberRequired: true,
-      },
-    },
-  },
+const cache = new Cache({
+  enableLegacyCallbacks: true // Enable legacy callbacks (not recommended)
 })
 ```
 
-## Custom Postal Code Rules
+## Configuration Examples
+
+### High-Performance Cache
 
 ```typescript
-const calculator = new VatCalculator({
-  rules: {
-    ES: {
-      // ... other rules
-      postalCodeRules: [
-        {
-          pattern: /^(35|38)\d{3}$/, // Canary Islands
-          rate: 0,
-        },
-      ],
-    },
-  },
+const cache = new Cache({
+  useClones: false, // Don't clone values
+  checkperiod: 0, // Disable periodic cleanup
+  deleteOnExpire: false // Don't auto-delete expired items
 })
 ```
 
-## Error Handling
-
-### SOAP Faults
+### In-Memory Database
 
 ```typescript
-const calculator = new VatCalculator({
-  forwardSoapFaults: true, // Forward SOAP errors from VIES service
+const cache = new Cache({
+  stdTTL: 0, // No expiration
+  maxKeys: 10000, // Limit key count
+  useClones: true, // Safe cloning
+  forceString: false // Keep original data types
 })
 ```
 
-### Timeouts
+### Short-lived Cache
 
 ```typescript
-const calculator = new VatCalculator({
-  soapTimeout: 30000, // 30 seconds timeout for VIES service calls
+const cache = new Cache({
+  stdTTL: 60, // 1 minute default TTL
+  checkperiod: 30, // Check every 30 seconds
+  deleteOnExpire: true, // Auto-delete expired items
+  maxKeys: 100 // Small cache size
 })
 ```
 
-## Best Practices
+### Memory-conscious Cache
 
-1. **Production Settings**
-
-   ```typescript
-   const calculator = new VatCalculator({
-     validateVatNumbers: true,
-     validatePostalCodes: true,
-     validateCountryCodes: true,
-     forwardSoapFaults: false,
-     soapTimeout: 15000,
-   })
-   ```
-
-2. **Development Settings**
-
-   ```typescript
-   const calculator = new VatCalculator({
-     validateVatNumbers: true,
-     validatePostalCodes: false,
-     validateCountryCodes: true,
-     forwardSoapFaults: true,
-     soapTimeout: 30000,
-   })
-   ```
-
-3. **High-Performance Settings**
-
-   ```typescript
-   const calculator = new VatCalculator({
-     validateVatNumbers: false,
-     validatePostalCodes: false,
-     validateCountryCodes: true,
-     soapTimeout: 5000,
-   })
-   ```
+```typescript
+const cache = new Cache({
+  maxKeys: 5000, // Limit key count
+  objectValueSize: 40, // Smaller object size estimation
+  arrayValueSize: 20, // Smaller array size estimation
+  useClones: false // Performance optimization
+})
+```
 
 For more information about using these configurations, check out the [Usage Guide](./usage.md) or the [API Documentation](./api.md).

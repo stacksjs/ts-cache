@@ -4,8 +4,8 @@ layout: home
 
 hero:
   name: "ts-cache"
-  text: "EU VAT Calculator"
-  tagline: "Easily handle EU MOSS tax & VAT regulations in TypeScript."
+  text: "TypeScript In-Memory Cache"
+  tagline: "A fast, type-safe, and feature-rich caching library for TypeScript applications."
   image: /images/logo-white.png
   actions:
     - theme: brand
@@ -16,18 +16,18 @@ hero:
       link: https://github.com/stacksjs/ts-cache
 
 features:
-  - title: "Complete EU VAT Rules"
-    icon: "🇪🇺"
-    details: "Up-to-date VAT rates and special rules for all EU countries including post-Brexit UK."
-  - title: "Validation Built-in"
-    icon: "✅"
-    details: "Validate VAT numbers, postal codes, and country codes with comprehensive error handling."
-  - title: "Special Cases Handled"
-    icon: "🎯"
-    details: "Support for special territories, reverse charge, and reduced rates."
-  - title: "Type-Safe"
+  - title: "High Performance Caching"
+    icon: "🚀"
+    details: "Optimized for speed with minimal overhead, configurable TTL, and automatic cleanup."
+  - title: "Type-Safe API"
     icon: "🛡️"
-    details: "Full TypeScript support with comprehensive type definitions."
+    details: "Full TypeScript support with generic methods for type-safe operations and IDE autocompletion."
+  - title: "Flexible Usage"
+    icon: "🔄"
+    details: "Simple get/set API, compute-if-absent pattern, multi-key operations, and event system."
+  - title: "Comprehensive Monitoring"
+    icon: "📊"
+    details: "Built-in statistics, memory usage estimation, and event-based tracking."
 ---
 
 <Home />
