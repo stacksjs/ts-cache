@@ -53,9 +53,9 @@
     "typecheck": "bun --bun tsc --noEmit"
   },
   "devDependencies": {
-    "@stacksjs/docs": "^0.70.10",
+    "@stacksjs/docs": "^0.70.22",
     "@stacksjs/eslint-config": "^4.10.2-beta.3",
-    "@types/bun": "^1.2.5",
+    "@types/bun": "^1.2.8",
     "bumpp": "^10.1.0",
     "bun-plugin-dtsx": "^0.21.9",
     "bunfig": "^0.8.2",
