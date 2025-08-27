@@ -64,7 +64,7 @@
     "buddy-bot": "^0.8.9",
     "bun-git-hooks": "^0.2.19",
     "bun-plugin-dtsx": "^0.21.9",
-    "bunfig": "^0.8.2",
+    "bunfig": "^0.14.1",
     "ts-clone": "^0.1.1",
     "typescript": "^5.8.3"
   },
