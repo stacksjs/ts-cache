@@ -1,0 +1,134 @@
+---
+description: General information based on the latest ./README.md content
+globs:
+---
+Update it if APIs change:
+
+# ts-cache
+
+A high-performance, type-safe in-memory caching library for TypeScript and JavaScript applications.
+
+## Features
+
+- 🚀 **High Performance** _Optimized for speed and minimal memory footprint_
+- ⏱️ **TTL Support** _Flexible time-to-live settings for cache entries_
+- 🔄 **Batch Operations** _Efficient multi-get, multi-set, and batch delete_
+- 📊 **Built-in Monitoring** _Statistics tracking and event system_
+- 🛡️ **Type Safety** _Full TypeScript support with generics for type-safe caching_
+- 🔧 **Configurable** _Extensive options for fine-tuning behavior_
+
+## Installation
+
+```bash
+# Using npm
+npm install ts-cache
+
+# Using yarn
+yarn add ts-cache
+
+# Using pnpm
+pnpm add ts-cache
+
+# Using bun
+bun add ts-cache
+```
+
+## Quick Start
+
+```typescript
+import cache from 'ts-cache'
+
+// Store a value (with 5 minute TTL)
+cache.set('user:123', { name: 'John', role: 'admin' }, 300)
+
+// Retrieve a value with type safety
+const user = cache.get<{ name: string, role: string }>('user:123')
+if (user) {
+  console.log(user.name) // TypeScript knows this is a string
+}
+
+// Check if a key exists
+if (cache.has('user:123')) {
+  // Key exists and is not expired
+}
+
+// Delete a key
+cache.del('user:123')
+
+// Get and remove in one operation
+const token = cache.take('one-time-token')
+
+// Fetch (get if exists, set if doesn't)
+const apiData = cache.fetch('api:users', 300, async () => {
+  // Only called if 'api:users' doesn't exist
+  return await fetchFromApi('/users')
+})
+```
+
+## Custom Cache Instance
+
+```typescript
+import { Cache } from 'ts-cache'
+
+// Create a custom cache with specific settings
+const myCache = new Cache({
+  stdTTL: 3600, // Default TTL: 1 hour
+  checkPeriod: 600, // Check for expired items every 10 minutes
+  maxKeys: 1000, // Maximum 1000 items
+  useClones: true, // Clone values on get/set operations
+  deleteOnExpire: true // Remove items when they expire
+})
+
+// Use the custom cache instance
+myCache.set('key', 'value')
+```
+
+## Batch Operations
+
+```typescript
+// Set multiple values at once
+cache.mset([
+  { key: 'key1', val: 'value1' },
+  { key: 'key2', val: 'value2' },
+  { key: 'key3', val: 'value3', ttl: 300 }
+])
+
+// Get multiple values at once
+const values = cache.mget(['key1', 'key2', 'key3'])
+
+// Delete multiple keys
+cache.del(['key1', 'key2'])
+```
+
+## Events
+
+```typescript
+// Listen for expired items
+cache.on('expired', (key, value) => {
+  console.log(`Item expired: ${key}`)
+  // Take action, like recomputing the value
+})
+
+// Other events: 'set', 'del', 'flush', 'flush-stats'
+cache.on('set', (key, value) => {
+  console.log(`Cache set: ${key}`)
+})
+```
+
+## Statistics
+
+```typescript
+// Get cache statistics
+const stats = cache.getStats()
+console.log(stats)
+// {
+//   hits: 127,
+//   misses: 9,
+//   keys: 42,
+//   ksize: 840,
+//   vsize: 2390
+// }
+
+// Reset statistics counters
+cache.flushStats()
+```

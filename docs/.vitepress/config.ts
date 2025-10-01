@@ -148,7 +148,7 @@ export default withPwa(
       manifest: {
         name: 'ts-cache Documentation',
         short_name: 'ts-cache Docs',
-        theme_color: '#3eaf7c',
+        theme_color: '#0A0ABC',
         icons: [
           {
             src: '/icons/android-chrome-192x192.png',
