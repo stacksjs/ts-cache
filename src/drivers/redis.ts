@@ -134,7 +134,7 @@ export class RedisDriver implements CacheDriver {
   async mget<T>(keys: Key[]): Promise<Record<string, T>> {
     try {
       const fullKeys = keys.map(k => this.getFullKey(k))
-      const values = await this.client.mget(fullKeys)
+      const values = await this.client.mget(...fullKeys)
 
       const result: Record<string, T> = {}
       for (let i = 0; i < keys.length; i++) {
