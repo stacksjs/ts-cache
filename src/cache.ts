@@ -198,10 +198,16 @@ export class Cache extends EventEmitter implements ICache {
    * @returns The fetched or cached value
    */
   fetch<T>(key: Key, ttlOrValue: number | string | (() => T) | T, value?: (() => T) | T): T {
-    // check if cache is hit
-    if (this.has(key)) {
-      return this.get<T>(key) as T
+    // Inline cache hit check to avoid double lookup
+    const keyStr = typeof key === 'string' ? key : key.toString()
+    const data = this.data[keyStr]
+
+    if (data !== undefined && (data.t === 0 || data.t >= Date.now())) {
+      this.stats.hits++
+      return this.options.useClones ? fastClone(data.v) : data.v
     }
+
+    this.stats.misses++
 
     let ttl: number | string | undefined
     let valueToFetch: (() => T) | T
@@ -313,29 +319,29 @@ export class Cache extends EventEmitter implements ICache {
     const keysArray = Array.isArray(keys) ? keys : [keys]
 
     let delCount = 0
-    for (const key of keysArray) {
+    for (let i = 0, len = keysArray.length; i < len; i++) {
+      const key = keysArray[i]
+
       // handle invalid key types
       const err = this._isInvalidKey(key)
       if (err)
         throw err
 
-      const keyStr = key.toString()
+      const keyStr = typeof key === 'string' ? key : key.toString()
       // only delete if existent
-      if (this.data[keyStr]) {
-        // calc the stats
-        this.stats.vsize -= this._getValLength(this._unwrap(this.data[keyStr], false))
-        this.stats.ksize -= this._getKeyLength(key)
+      const data = this.data[keyStr]
+      if (data) {
+        // calc the stats - inline for performance
+        this.stats.vsize -= this._getValLength(data.v)
+        this.stats.ksize -= keyStr.length
         this.stats.keys--
         delCount++
-
-        // save old value for event
-        const oldVal = this.data[keyStr]
 
         // delete the value
         delete this.data[keyStr]
 
         // emit delete event
-        this.emit('del', key, oldVal.v)
+        this.emit('del', key, data.v)
       }
     }
 
@@ -575,14 +581,12 @@ export class Cache extends EventEmitter implements ICache {
     const now = Date.now()
     let livetime = 0
 
-    const ttlMultiplicator = 1000
-
     // use given ttl
     if (ttl === 0) {
       livetime = 0
     }
     else if (ttl) {
-      livetime = now + (ttl * ttlMultiplicator)
+      livetime = now + (ttl * 1000)
     }
     else {
       // use standard ttl
@@ -590,14 +594,14 @@ export class Cache extends EventEmitter implements ICache {
         livetime = this.options.stdTTL as number
       }
       else {
-        livetime = now + ((this.options.stdTTL as number) * ttlMultiplicator)
+        livetime = now + ((this.options.stdTTL as number) * 1000)
       }
     }
 
     // return the wrapped value
     return {
       t: livetime,
-      v: asClone ? clone(value) : value,
+      v: asClone ? fastClone(value) : value,
     }
   }
 
@@ -610,7 +614,7 @@ export class Cache extends EventEmitter implements ICache {
     }
 
     if (value.v !== undefined) {
-      return asClone ? clone(value.v) : value.v
+      return asClone ? fastClone(value.v) : value.v
     }
 
     return null as any
