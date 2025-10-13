@@ -31,7 +31,7 @@ import cache from 'ts-cache';
 
 // Creating custom instance
 import { Cache } from 'ts-cache';
-const myCache = new Cache({ ttl: 600 });
+const client = new Cache({ ttl: 600 });
 ```
 
 ## Constructor Options

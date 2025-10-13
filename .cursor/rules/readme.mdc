@@ -71,7 +71,7 @@ const apiData = cache.fetch('api:users', 300, async () => {
 import { Cache } from 'ts-cache'
 
 // Create a custom cache with specific settings
-const myCache = new Cache({
+const client = new Cache({
   stdTTL: 3600, // Default TTL: 1 hour
   checkPeriod: 600, // Check for expired items every 10 minutes
   maxKeys: 1000, // Maximum 1000 items
@@ -80,7 +80,7 @@ const myCache = new Cache({
 })
 
 // Use the custom cache instance
-myCache.set('key', 'value')
+client.set('key', 'value')
 ```
 
 ## Batch Operations
