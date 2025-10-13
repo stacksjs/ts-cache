@@ -11,18 +11,16 @@ A high-performance, type-safe caching library for TypeScript and JavaScript appl
 
 ## Features
 
-- 🚀 **Multiple Drivers** _Memory and Redis support with driver abstraction_
-- ⚡ **Bun Native Redis** _Built-in support for Bun's native Redis client (v1.2.9+)_
-- 🔄 **Async API** _Promise-based API for all operations_
-- ⏱️ **TTL Support** _Flexible time-to-live settings for cache entries_
-- 🏷️ **Tagging System** _Organize and invalidate cache by tags_
-- 📦 **Batch Operations** _Efficient multi-get, multi-set, and batch operations_
-- 🔐 **Advanced Features** _Rate limiting, distributed locking, memoization_
-- 📊 **Built-in Monitoring** _Statistics tracking and event system_
-- 🛡️ **Type Safety** _Full TypeScript support with generics_
-- 🔧 **Configurable** _Extensive options for fine-tuning behavior_
-- 🌐 **Namespaces** _Isolate cache data with prefixed namespaces_
-- 🔄 **Serializers** _Multiple serialization strategies for different data types_
+- 🚀 **Multiple Drivers** - Memory, Memory-LRU, and Redis (using Bun's native client)
+- 🔄 **Async & Sync APIs** - Promise-based async API with legacy sync support
+- ⏱️ **Flexible TTL** - Per-key TTL with fixed, sliding window, and probabilistic strategies
+- 📦 **Batch Operations** - Efficient mset/mget for multiple keys at once
+- 🏷️ **Tagging System** - Organize and invalidate cache entries by tags
+- 🔀 **Caching Patterns** - Cache-aside, read-through, write-through, write-behind, refresh-ahead, multi-level
+- 🎯 **CLI Tool** - Complete command-line interface with 11 commands
+- 🗜️ **Compression** - gzip, brotli, and smart compression with configurable thresholds
+- 🛡️ **Type Safety** - Full TypeScript support with generics
+- 🔧 **Highly Configurable** - 27+ configuration options for fine-tuned control
 
 ## Installation
 
@@ -205,6 +203,99 @@ console.log(await memoized(5, 3)) // Computes and caches
 console.log(await memoized(5, 3)) // Returns cached result
 ```
 
+## Caching Patterns
+
+ts-cache includes built-in support for common caching patterns:
+
+### Cache-Aside (Lazy Loading)
+
+```typescript
+import { CacheAside } from '@stacksjs/ts-cache'
+
+const pattern = new CacheAside(cache)
+
+// Load data on-demand
+const user = await pattern.get('user:123', async (key) => {
+  return await database.getUser(123)
+}, 3600)
+```
+
+### Read-Through
+
+```typescript
+import { ReadThrough } from '@stacksjs/ts-cache'
+
+const pattern = new ReadThrough(cache, async (key) => {
+  return await database.get(key)
+}, 3600)
+
+const data = await pattern.get('key')
+```
+
+### Write-Through
+
+```typescript
+import { WriteThrough } from '@stacksjs/ts-cache'
+
+const pattern = new WriteThrough(cache, async (key, value) => {
+  await database.save(key, value)
+})
+
+// Writes to both cache and database
+await pattern.set('user:123', userData, 3600)
+```
+
+### Write-Behind (Write-Back)
+
+```typescript
+import { WriteBack } from '@stacksjs/ts-cache'
+
+const pattern = new WriteBack(
+  cache,
+  async (key, value) => await database.save(key, value),
+  1000, // Flush delay in ms
+)
+
+// Writes to cache immediately, database later
+await pattern.set('user:123', userData)
+
+// Manually flush pending writes
+await pattern.flush()
+```
+
+### Refresh-Ahead
+
+```typescript
+import { RefreshAhead } from '@stacksjs/ts-cache'
+
+const pattern = new RefreshAhead(
+  cache,
+  async (key) => await fetchFreshData(key),
+  3600, // TTL
+  0.8, // Refresh when 80% of TTL has passed
+)
+
+// Returns cached value, refreshes in background if stale
+const data = await pattern.get('key')
+```
+
+### Multi-Level Cache
+
+```typescript
+import { MultiLevelPattern, createCache } from '@stacksjs/ts-cache'
+
+const l1 = createCache({ driver: 'memory', maxKeys: 100 })
+const l2 = createCache({ driver: 'redis' })
+
+const pattern = new MultiLevelPattern([l1, l2], [300, 3600])
+
+// Checks L1, then L2, populates higher levels on hit
+const value = await pattern.get('key')
+
+// Writes to all levels
+await pattern.set('key', 'value')
+```
+
 ## Batch Operations
 
 Efficiently handle multiple operations:
@@ -295,7 +386,189 @@ console.log(stats)
 // }
 ```
 
+## CLI Tool
+
+ts-cache includes a powerful command-line interface for managing your cache:
+
+```bash
+# Install globally for CLI access
+npm install -g @stacksjs/ts-cache
+
+# Or use with npx/bunx
+bunx cache --help
+```
+
+### Available Commands
+
+```bash
+# Get a value from cache
+cache get user:123
+cache get user:123 --json
+
+# Set a value with TTL
+cache set user:123 '{"name":"John"}' --json --ttl 3600
+
+# Delete keys
+cache del user:123
+cache del user:* session:*
+
+# Check if key exists
+cache has user:123
+
+# List all keys
+cache keys
+cache keys "user:*"
+
+# Get TTL of a key
+cache ttl session:abc
+
+# View cache statistics
+cache stats
+cache stats --json
+
+# Show current configuration
+cache config
+cache config --json
+
+# Flush all cache data
+cache flush --force
+
+# Test cache connectivity
+cache test
+cache test --driver redis
+
+# Show library info
+cache info
+
+# Show version
+cache version
+```
+
+### CLI Options
+
+All commands support these options:
+
+- `--driver <driver>` - Use specific driver (memory, memory-lru, redis)
+- `--prefix <prefix>` - Add key prefix
+- `--json` - Output in JSON format (machine-readable)
+- `--ttl <seconds>` - Set time-to-live for set operations
+
 ## Configuration
+
+ts-cache supports comprehensive configuration through a `cache.config.ts` file at the root of your project:
+
+```typescript
+// cache.config.ts
+import type { CacheConfig } from '@stacksjs/ts-cache'
+
+const config: CacheConfig = {
+  // General Settings
+  driver: 'memory', // 'memory' | 'memory-lru' | 'redis'
+  prefix: 'myapp',
+  verbose: true,
+
+  // Common Cache Settings
+  stdTTL: 3600, // Default TTL in seconds
+  checkPeriod: 600, // Cleanup interval
+  maxKeys: 1000,
+  useClones: true,
+
+  // Redis Configuration
+  redis: {
+    url: process.env.REDIS_URL,
+    host: 'localhost',
+    port: 6379,
+    password: process.env.REDIS_PASSWORD,
+    database: 0,
+  },
+
+  // Compression
+  compression: {
+    algorithm: 'gzip', // 'gzip' | 'brotli' | 'smart' | 'none'
+    level: 6,
+    threshold: 1024, // Only compress if larger than 1KB
+    enabled: true,
+  },
+
+  // Middleware
+  middleware: {
+    enabled: true,
+    logging: true,
+    metrics: true,
+    retry: {
+      enabled: true,
+      maxRetries: 3,
+      initialDelay: 100,
+    },
+  },
+
+  // Caching Patterns
+  patterns: {
+    refreshAhead: {
+      ttl: 3600,
+      thresholdPercentage: 0.8, // Refresh when 80% of TTL passed
+    },
+    slidingWindow: {
+      ttl: 3600, // Reset TTL on access
+    },
+  },
+
+  // Event Hooks
+  events: {
+    onSet: (key, value) => console.log(`Set: ${key}`),
+    onGet: (key, value) => console.log(`Get: ${key}`),
+    onMiss: (key) => console.log(`Miss: ${key}`),
+  },
+
+  // Performance Tuning
+  performance: {
+    enableStats: true,
+    batchSize: 100,
+    warmup: {
+      enabled: true,
+      keys: ['popular:item:1', 'popular:item:2'],
+    },
+  },
+
+  // Multi-Level Cache
+  multiLevel: {
+    enabled: true,
+    levels: [
+      { driver: 'memory', ttl: 300, maxKeys: 1000 }, // L1: Fast
+      { driver: 'redis', ttl: 3600 }, // L2: Persistent
+    ],
+  },
+
+  // TTL Strategy
+  ttlStrategy: {
+    mode: 'sliding', // 'fixed' | 'sliding' | 'probabilistic'
+    jitter: 0.1, // Add 10% jitter to prevent thundering herd
+  },
+
+  // Error Handling
+  errorHandling: {
+    throwOnError: false,
+    circuitBreaker: {
+      enabled: true,
+      threshold: 5,
+      timeout: 60000,
+    },
+  },
+
+  // Debug Mode
+  debug: {
+    enabled: false,
+    logLevel: 'info',
+    trackAccess: true,
+  },
+}
+
+export default config
+```
+
+### Configuration Options
+
+See the [complete configuration reference](./cache.config.ts) for all 27+ available options.
 
 ### Memory Driver Options
 
