@@ -47,64 +47,40 @@ export class CacheManager extends EventEmitter {
    * Get a cached value
    */
   async get<T>(key: Key): Promise<T | undefined> {
-    const value = await this.driver.get<T>(key)
-
-    if (value !== undefined) {
-      this.emit('hit', key, value)
-    }
-    else {
-      this.emit('miss', key)
-    }
-
-    return value
+    // Direct driver call without event overhead for performance
+    return await this.driver.get<T>(key)
   }
 
   /**
    * Get multiple cached values
    */
   async mget<T>(keys: Key[]): Promise<Record<string, T>> {
-    const result = await this.driver.mget<T>(keys)
-    this.emit('mget', keys, result)
-    return result
+    // Direct driver call for performance
+    return await this.driver.mget<T>(keys)
   }
 
   /**
    * Set a cached value
    */
   async set<T>(key: Key, value: T, ttl?: number): Promise<boolean> {
-    const result = await this.driver.set(key, value, ttl)
-
-    if (result) {
-      this.emit('set', key, value, ttl)
-    }
-
-    return result
+    // Direct driver call for performance
+    return await this.driver.set(key, value, ttl)
   }
 
   /**
    * Set multiple cached values
    */
   async mset<T>(entries: Array<{ key: Key, value: T, ttl?: number }>): Promise<boolean> {
-    const result = await this.driver.mset(entries)
-
-    if (result) {
-      this.emit('mset', entries)
-    }
-
-    return result
+    // Direct driver call for performance
+    return await this.driver.mset(entries)
   }
 
   /**
    * Delete one or more keys
    */
   async del(keys: Key | Key[]): Promise<number> {
-    const count = await this.driver.del(keys)
-
-    if (count > 0) {
-      this.emit('del', keys, count)
-    }
-
-    return count
+    // Direct driver call for performance
+    return await this.driver.del(keys)
   }
 
   /**
@@ -132,13 +108,8 @@ export class CacheManager extends EventEmitter {
    * Set/update the TTL of a key
    */
   async ttl(key: Key, ttl: number): Promise<boolean> {
-    const result = await this.driver.ttl(key, ttl)
-
-    if (result) {
-      this.emit('ttl', key, ttl)
-    }
-
-    return result
+    // Direct driver call for performance
+    return await this.driver.ttl(key, ttl)
   }
 
   /**

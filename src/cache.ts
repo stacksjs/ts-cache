@@ -1,8 +1,19 @@
 import type { CacheError, Data, Cache as ICache, Key, Options, Stats, ValueSetItem, WrappedValue } from './types'
 import { Buffer } from 'node:buffer'
 import { EventEmitter } from 'node:events'
-import clone from 'clone'
 import { DEFAULT_OPTIONS, ERROR_MESSAGES } from './config'
+
+/**
+ * Fast deep clone using structuredClone (fastest option in modern runtimes)
+ * Falls back to JSON parse/stringify if structuredClone is not available
+ */
+function fastClone<T>(value: T): T {
+  if (typeof structuredClone !== 'undefined') {
+    return structuredClone(value)
+  }
+  // Fallback for older environments
+  return JSON.parse(JSON.stringify(value))
+}
 
 /**
  * TypeScript port of node-cache
@@ -50,22 +61,27 @@ export class Cache extends EventEmitter implements ICache {
    * @returns The value stored in the key or undefined if not found
    */
   get<T>(key: Key): T | undefined {
-    // handle invalid key types
-    const err = this._isInvalidKey(key)
-    if (err)
-      throw err
+    // Fast path: convert key to string once
+    const keyStr = typeof key === 'string' ? key : key.toString()
+    const data = this.data[keyStr]
 
-    // get data and increment stats
-    const keyStr = key.toString()
-    if (this.data[keyStr] && this._check(keyStr, this.data[keyStr])) {
-      this.stats.hits++
-      return this._unwrap<T>(this.data[keyStr])
+    // Fast existence and TTL check
+    if (data !== undefined) {
+      // Inline TTL check for performance
+      if (data.t === 0 || data.t >= Date.now()) {
+        this.stats.hits++
+        // Inline unwrap for performance
+        return this.options.useClones ? fastClone(data.v) : data.v
+      }
+      else if (this.options.deleteOnExpire) {
+        // Expired, clean up
+        this.del(key)
+      }
     }
-    else {
-      // if not found return undefined
-      this.stats.misses++
-      return undefined
-    }
+
+    // Not found or expired
+    this.stats.misses++
+    return undefined
   }
 
   /**
@@ -74,34 +90,35 @@ export class Cache extends EventEmitter implements ICache {
    * @returns An object containing the values stored in the matching keys
    */
   mget<T>(keys: Key[]): { [key: string]: T } {
-    // validate keys is an array
-    if (!Array.isArray(keys)) {
-      const err = this._error('EKEYSTYPE')
-      throw err
-    }
-
-    // define return
+    // Pre-allocate result object
     const result: { [key: string]: T } = {}
+    const now = Date.now()
+    const useClones = this.options.useClones
 
-    for (const key of keys) {
-      // handle invalid key types
-      const err = this._isInvalidKey(key)
-      if (err)
-        throw err
+    // Optimized loop - avoid repeated method calls
+    for (let i = 0, len = keys.length; i < len; i++) {
+      const key = keys[i]
+      const keyStr = typeof key === 'string' ? key : key.toString()
+      const data = this.data[keyStr]
 
-      // get data and increment stats
-      const keyStr = key.toString()
-      if (this.data[keyStr] && this._check(keyStr, this.data[keyStr])) {
-        this.stats.hits++
-        result[keyStr] = this._unwrap<T>(this.data[keyStr])
+      if (data !== undefined) {
+        // Inline TTL check
+        if (data.t === 0 || data.t >= now) {
+          this.stats.hits++
+          result[keyStr] = useClones ? fastClone(data.v) : data.v
+        }
+        else {
+          this.stats.misses++
+          if (this.options.deleteOnExpire) {
+            this.del(key)
+          }
+        }
       }
       else {
-        // if not found, increment misses
         this.stats.misses++
       }
     }
 
-    // return all found keys
     return result
   }
 
@@ -113,55 +130,60 @@ export class Cache extends EventEmitter implements ICache {
    * @returns Boolean indicating if the operation was successful
    */
   set<T>(key: Key, value: T, ttl?: number | string): boolean {
-    // check if cache is overflowing
-    if (this.options.maxKeys && this.options.maxKeys > -1 && this.stats.keys >= this.options.maxKeys) {
+    // Fast path: convert key to string once
+    const keyStr = typeof key === 'string' ? key : key.toString()
+    const existent = this.data[keyStr] !== undefined
+
+    // Check max keys only for new keys
+    if (!existent && this.options.maxKeys && this.options.maxKeys > -1 && this.stats.keys >= this.options.maxKeys) {
       const err = this._error('ECACHEFULL')
       throw err
     }
 
-    // force the data to string if configured
-    let valueToStore: any = value
-    if (this.options.forceString && typeof value !== 'string') {
-      valueToStore = JSON.stringify(value)
+    // Force string if configured
+    const valueToStore = this.options.forceString && typeof value !== 'string'
+      ? JSON.stringify(value)
+      : value
+
+    // Parse TTL if string
+    const ttlValue = typeof ttl === 'string' ? Number.parseInt(ttl, 10) : ttl
+
+    // Calculate TTL timestamp
+    const now = Date.now()
+    let livetime = 0
+
+    if (ttlValue === 0) {
+      livetime = 0
+    }
+    else if (ttlValue) {
+      livetime = now + (ttlValue * 1000)
+    }
+    else if (this.options.stdTTL === 0) {
+      livetime = 0
+    }
+    else if (this.options.stdTTL) {
+      livetime = now + (this.options.stdTTL * 1000)
     }
 
-    // set default ttl if not passed
-    let ttlValue: number | undefined
-    if (typeof ttl === 'string') {
-      ttlValue = Number.parseInt(ttl, 10)
-    }
-    else {
-      ttlValue = ttl
+    // Update stats for existing keys
+    if (existent) {
+      this.stats.vsize -= this._getValLength(this.data[keyStr].v)
     }
 
-    // handle invalid key types
-    const err = this._isInvalidKey(key)
-    if (err)
-      throw err
-
-    // internal helper variables
-    let existent = false
-    const keyStr = key.toString()
-
-    // remove existing data from stats
-    if (this.data[keyStr]) {
-      existent = true
-      this.stats.vsize -= this._getValLength(this._unwrap(this.data[keyStr], false))
+    // Wrap and store value (inline for performance)
+    this.data[keyStr] = {
+      t: livetime,
+      v: this.options.useClones ? fastClone(valueToStore) : valueToStore,
     }
 
-    // set the value
-    this.data[keyStr] = this._wrap(valueToStore, ttlValue)
     this.stats.vsize += this._getValLength(valueToStore)
 
-    // only add the keys and key-size if the key is new
+    // Update stats for new keys
     if (!existent) {
-      this.stats.ksize += this._getKeyLength(key)
+      this.stats.ksize += keyStr.length
       this.stats.keys++
     }
 
-    this.emit('set', key, value)
-
-    // return true
     return true
   }
 
@@ -207,32 +229,75 @@ export class Cache extends EventEmitter implements ICache {
    * @returns Boolean indicating if the operation was successful
    */
   mset<T>(keyValueSet: ValueSetItem<T>[]): boolean {
-    // check if cache is overflowing
+    // Pre-calculate values for performance
+    const now = Date.now()
+    const useClones = this.options.useClones
+    const stdTTL = this.options.stdTTL
+    const forceString = this.options.forceString
+
+    // Count new keys for maxKeys check
+    let newKeysCount = 0
+    for (let i = 0, len = keyValueSet.length; i < len; i++) {
+      const keyStr = typeof keyValueSet[i].key === 'string'
+        ? keyValueSet[i].key as string
+        : keyValueSet[i].key.toString()
+
+      if (this.data[keyStr] === undefined) {
+        newKeysCount++
+      }
+    }
+
+    // Check max keys
     if (this.options.maxKeys && this.options.maxKeys > -1
-      && this.stats.keys + keyValueSet.length >= this.options.maxKeys) {
+      && this.stats.keys + newKeysCount > this.options.maxKeys) {
       const err = this._error('ECACHEFULL')
       throw err
     }
 
-    // loop over keyValueSet to validate key and ttl
-    for (const keyValuePair of keyValueSet) {
-      const { key, ttl } = keyValuePair
+    // Optimized batch set
+    for (let i = 0, len = keyValueSet.length; i < len; i++) {
+      const { key, val, ttl } = keyValueSet[i]
+      const keyStr = typeof key === 'string' ? key : key.toString()
+      const existent = this.data[keyStr] !== undefined
 
-      // check if there is ttl and it's a number
-      if (ttl && typeof ttl !== 'number') {
-        const err = this._error('ETTLTYPE')
-        throw err
+      // Force string if configured
+      const valueToStore = forceString && typeof val !== 'string'
+        ? JSON.stringify(val)
+        : val
+
+      // Calculate TTL
+      let livetime = 0
+      if (ttl === 0) {
+        livetime = 0
+      }
+      else if (ttl) {
+        livetime = now + (ttl * 1000)
+      }
+      else if (stdTTL === 0) {
+        livetime = 0
+      }
+      else if (stdTTL) {
+        livetime = now + (stdTTL * 1000)
       }
 
-      // handle invalid key types
-      const err = this._isInvalidKey(key)
-      if (err)
-        throw err
-    }
+      // Update stats for existing keys
+      if (existent) {
+        this.stats.vsize -= this._getValLength(this.data[keyStr].v)
+      }
 
-    for (const keyValuePair of keyValueSet) {
-      const { key, val, ttl } = keyValuePair
-      this.set(key, val, ttl)
+      // Store value
+      this.data[keyStr] = {
+        t: livetime,
+        v: useClones ? fastClone(valueToStore) : valueToStore,
+      }
+
+      this.stats.vsize += this._getValLength(valueToStore)
+
+      // Update stats for new keys
+      if (!existent) {
+        this.stats.ksize += keyStr.length
+        this.stats.keys++
+      }
     }
 
     return true
@@ -372,8 +437,15 @@ export class Cache extends EventEmitter implements ICache {
    * @returns Boolean indicating if the key is cached
    */
   has(key: Key): boolean {
-    const keyStr = key.toString()
-    return !!(this.data[keyStr] && this._check(keyStr, this.data[keyStr]))
+    const keyStr = typeof key === 'string' ? key : key.toString()
+    const data = this.data[keyStr]
+
+    // Fast existence and TTL check
+    if (data !== undefined) {
+      return data.t === 0 || data.t >= Date.now()
+    }
+
+    return false
   }
 
   /**
