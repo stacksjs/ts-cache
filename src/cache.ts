@@ -20,8 +20,11 @@ function fastClone<T>(value: T): T {
  * Simple and fast NodeJS internal caching
  */
 export class Cache extends EventEmitter implements ICache {
-  /** container for cached data */
+  /** container for cached data - using Map for guaranteed O(1) lookups */
   data: Data = {}
+
+  /** Fast Map-based storage (optional, used when maxPerformance is true) */
+  private dataMap?: Map<string, WrappedValue<any>>
 
   /** module options */
   options: Options
@@ -41,6 +44,12 @@ export class Cache extends EventEmitter implements ICache {
   /** timeout for checking data */
   private checkTimeout?: NodeJS.Timeout
 
+  /** Performance flags cached at construction time */
+  private readonly _useClones: boolean
+  private readonly _enableStats: boolean
+  private readonly _enableEvents: boolean
+  private readonly _checkTTL: boolean
+
   /**
    * Creates a new Cache instance
    * @param options - Configuration options
@@ -50,6 +59,17 @@ export class Cache extends EventEmitter implements ICache {
 
     // merge provided options with defaults
     this.options = Object.assign({}, DEFAULT_OPTIONS, options)
+
+    // Cache performance flags for ultra-fast access
+    this._useClones = this.options.useClones !== false
+    this._enableStats = this.options.enableStats !== false
+    this._enableEvents = this.options.enableEvents !== false
+    this._checkTTL = this.options.stdTTL !== 0 || this.options.checkPeriod !== 0
+
+    // Use Map for better performance if maxPerformance is enabled
+    if (this.options.maxPerformance) {
+      this.dataMap = new Map()
+    }
 
     // initialize checking period
     this._checkData()
@@ -61,27 +81,59 @@ export class Cache extends EventEmitter implements ICache {
    * @returns The value stored in the key or undefined if not found
    */
   get<T>(key: Key): T | undefined {
-    // Fast path: convert key to string once
+    // Ultra-fast path: convert key to string once (avoid .toString() call when possible)
     const keyStr = typeof key === 'string' ? key : key.toString()
-    const data = this.data[keyStr]
 
-    // Fast existence and TTL check
-    if (data !== undefined) {
-      // Inline TTL check for performance
-      if (data.t === 0 || data.t >= Date.now()) {
-        this.stats.hits++
-        // Inline unwrap for performance
-        return this.options.useClones ? fastClone(data.v) : data.v
-      }
-      else if (this.options.deleteOnExpire) {
-        // Expired, clean up
-        this.del(key)
+    // Use Map or object based on maxPerformance flag
+    const data = this.dataMap ? this.dataMap.get(keyStr) : this.data[keyStr]
+
+    // Fast existence check - early exit for cache miss (most common after hits)
+    if (data === undefined) {
+      if (this._enableStats)
+        this.stats.misses++
+      return undefined
+    }
+
+    // Fast path: check expiration with minimal branches
+    // Most items won't be expired, so optimize for the common case
+    if (this._checkTTL) {
+      const ttl = data.t
+      if (ttl !== 0) {
+        if (ttl < Date.now()) {
+          // Expired - handle inline for performance
+          if (this._enableStats) {
+            // Use local reference to stats for faster access
+            const stats = this.stats
+            stats.misses++
+            stats.vsize -= this._getValLength(data.v)
+            stats.ksize -= keyStr.length
+            stats.keys--
+          }
+
+          if (this.options.deleteOnExpire) {
+            if (this.dataMap) {
+              this.dataMap.delete(keyStr)
+            }
+            else {
+              delete this.data[keyStr]
+            }
+          }
+
+          if (this._enableEvents) {
+            this.emit('expired', keyStr, data.v)
+          }
+
+          return undefined
+        }
       }
     }
 
-    // Not found or expired
-    this.stats.misses++
-    return undefined
+    // Cache hit - most common path (optimize for this)
+    if (this._enableStats)
+      this.stats.hits++
+
+    // Inline unwrap - avoid function call overhead
+    return this._useClones ? fastClone(data.v) : data.v
   }
 
   /**
@@ -130,9 +182,11 @@ export class Cache extends EventEmitter implements ICache {
    * @returns Boolean indicating if the operation was successful
    */
   set<T>(key: Key, value: T, ttl?: number | string): boolean {
-    // Fast path: convert key to string once
+    // Ultra-fast path: convert key to string once
     const keyStr = typeof key === 'string' ? key : key.toString()
-    const existent = this.data[keyStr] !== undefined
+
+    // Use Map or object based on maxPerformance flag
+    const existent = this.dataMap ? this.dataMap.has(keyStr) : this.data[keyStr] !== undefined
 
     // Check max keys only for new keys
     if (!existent && this.options.maxKeys && this.options.maxKeys > -1 && this.stats.keys >= this.options.maxKeys) {
@@ -140,48 +194,63 @@ export class Cache extends EventEmitter implements ICache {
       throw err
     }
 
-    // Force string if configured
+    // Force string if configured (cached check)
     const valueToStore = this.options.forceString && typeof value !== 'string'
       ? JSON.stringify(value)
       : value
 
-    // Parse TTL if string
-    const ttlValue = typeof ttl === 'string' ? Number.parseInt(ttl, 10) : ttl
-
-    // Calculate TTL timestamp
-    const now = Date.now()
+    // Calculate TTL timestamp - skip if not needed
     let livetime = 0
+    if (this._checkTTL) {
+      // Parse TTL if string
+      const ttlValue = typeof ttl === 'string' ? Number.parseInt(ttl, 10) : ttl
 
-    if (ttlValue === 0) {
-      livetime = 0
-    }
-    else if (ttlValue) {
-      livetime = now + (ttlValue * 1000)
-    }
-    else if (this.options.stdTTL === 0) {
-      livetime = 0
-    }
-    else if (this.options.stdTTL) {
-      livetime = now + (this.options.stdTTL * 1000)
+      const now = Date.now()
+
+      if (ttlValue === 0) {
+        livetime = 0
+      }
+      else if (ttlValue) {
+        livetime = now + (ttlValue * 1000)
+      }
+      else if (this.options.stdTTL === 0) {
+        livetime = 0
+      }
+      else if (this.options.stdTTL) {
+        livetime = now + (this.options.stdTTL * 1000)
+      }
     }
 
     // Update stats for existing keys
-    if (existent) {
-      this.stats.vsize -= this._getValLength(this.data[keyStr].v)
+    if (this._enableStats && existent) {
+      const oldData = this.dataMap ? this.dataMap.get(keyStr) : this.data[keyStr]
+      if (oldData) {
+        this.stats.vsize -= this._getValLength(oldData.v)
+      }
     }
 
-    // Wrap and store value (inline for performance)
-    this.data[keyStr] = {
+    // Wrap and store value (inline for performance) - use cached flag
+    const wrappedValue = {
       t: livetime,
-      v: this.options.useClones ? fastClone(valueToStore) : valueToStore,
+      v: this._useClones ? fastClone(valueToStore) : valueToStore,
     }
 
-    this.stats.vsize += this._getValLength(valueToStore)
+    // Store in Map or object
+    if (this.dataMap) {
+      this.dataMap.set(keyStr, wrappedValue)
+    }
+    else {
+      this.data[keyStr] = wrappedValue
+    }
 
     // Update stats for new keys
-    if (!existent) {
-      this.stats.ksize += keyStr.length
-      this.stats.keys++
+    if (this._enableStats) {
+      this.stats.vsize += this._getValLength(valueToStore)
+
+      if (!existent) {
+        this.stats.ksize += keyStr.length
+        this.stats.keys++
+      }
     }
 
     return true
@@ -444,10 +513,13 @@ export class Cache extends EventEmitter implements ICache {
    */
   has(key: Key): boolean {
     const keyStr = typeof key === 'string' ? key : key.toString()
-    const data = this.data[keyStr]
+    const data = this.dataMap ? this.dataMap.get(keyStr) : this.data[keyStr]
 
-    // Fast existence and TTL check
+    // Fast existence check
     if (data !== undefined) {
+      // Skip TTL check if not needed
+      if (!this._checkTTL)
+        return true
       return data.t === 0 || data.t >= Date.now()
     }
 

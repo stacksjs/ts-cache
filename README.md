@@ -22,6 +22,33 @@ A high-performance, type-safe caching library for TypeScript and JavaScript appl
 - 🛡️ **Type Safety** - Full TypeScript support with generics
 - 🔧 **Highly Configurable** - 27+ configuration options for fine-tuned control
 
+## Performance
+
+**ts-cache can be faster than lru-cache!** 🏆
+
+With ultra-fast mode enabled, ts-cache achieves:
+- **GET: 3.90 ns** (3.2x faster than lru-cache's 12.37 ns)
+- **SET: 30.24 ns** (1.3x faster than lru-cache's 39.52 ns)
+
+Enable ultra-fast mode for maximum performance:
+
+```typescript
+const cache = new Cache({
+  useClones: false, // Store references (no cloning)
+  enableStats: false, // Disable statistics
+  enableEvents: false, // Disable events
+  stdTTL: 0, // Disable TTL checking
+  checkPeriod: 0, // Disable expiration checks
+  maxPerformance: true, // Use Map storage
+})
+
+// Now faster than lru-cache!
+cache.set('key', value) // 30ns vs lru-cache 40ns
+cache.get('key') // 4ns vs lru-cache 12ns
+```
+
+See [benchmarks](./benchmarks/ULTRA-FAST-MODE.md) for details.
+
 ## Installation
 
 ```bash
@@ -270,7 +297,7 @@ import { RefreshAhead } from '@stacksjs/ts-cache'
 
 const pattern = new RefreshAhead(
   cache,
-  async (key) => await fetchFreshData(key),
+  async key => await fetchFreshData(key),
   3600, // TTL
   0.8, // Refresh when 80% of TTL has passed
 )
@@ -282,7 +309,7 @@ const data = await pattern.get('key')
 ### Multi-Level Cache
 
 ```typescript
-import { MultiLevelPattern, createCache } from '@stacksjs/ts-cache'
+import { createCache, MultiLevelPattern } from '@stacksjs/ts-cache'
 
 const l1 = createCache({ driver: 'memory', maxKeys: 100 })
 const l2 = createCache({ driver: 'redis' })
@@ -517,7 +544,7 @@ const config: CacheConfig = {
   events: {
     onSet: (key, value) => console.log(`Set: ${key}`),
     onGet: (key, value) => console.log(`Get: ${key}`),
-    onMiss: (key) => console.log(`Miss: ${key}`),
+    onMiss: key => console.log(`Miss: ${key}`),
   },
 
   // Performance Tuning

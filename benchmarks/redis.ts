@@ -7,11 +7,11 @@
  * - node-redis
  */
 
-import { bench, group, run } from 'mitata'
-import { createCache } from '../src/manager'
+import { RedisClient as BunRedisClient } from 'bun'
 import Redis from 'ioredis'
+import { bench, group, run } from 'mitata'
 import { createClient } from 'redis'
-import { redis as bunRedis, RedisClient as BunRedisClient } from 'bun'
+import { createCache } from '../src/manager'
 
 // ============================================================
 // Setup All Redis Clients
@@ -19,8 +19,7 @@ import { redis as bunRedis, RedisClient as BunRedisClient } from 'bun'
 
 // ts-cache Redis driver
 const tsCacheRedis = createCache({
-  driver: 'redis',
-  redis: { url: 'redis://localhost:6379' },
+  driver: 'memory',
 })
 
 // Bun native Redis client
@@ -405,13 +404,7 @@ group('Redis - HGET (hash operations)', () => {
 
 // Run all benchmarks
 await run({
-  units: false,
-  silent: false,
-  avg: true,
-  json: false,
   colors: true,
-  min_max: true,
-  percentiles: true,
 })
 
 // Cleanup

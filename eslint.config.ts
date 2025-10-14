@@ -14,6 +14,9 @@ const config: ESLintConfig = stacks({
     'fixtures/**',
     '**/api.md',
     '**/install.md',
+    '**/benchmarks/**',
+    '**/test-features.ts',
+    '**/TEST-REPORT.md',
   ],
 })
 

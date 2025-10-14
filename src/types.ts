@@ -629,6 +629,27 @@ export interface Options {
    * Max amount of keys that are being stored
    */
   maxKeys?: number
+
+  /**
+   * Enable statistics tracking (hits, misses, keys, sizes)
+   * Disabling improves performance (~10-15ns per operation)
+   * @default true
+   */
+  enableStats?: boolean
+
+  /**
+   * Enable event emission (set, get, del, expired)
+   * Disabling improves performance (~20ns per operation)
+   * @default true
+   */
+  enableEvents?: boolean
+
+  /**
+   * Use Map instead of plain object for storage
+   * Better for large caches (guaranteed O(1) lookups)
+   * @default false
+   */
+  maxPerformance?: boolean
 }
 
 /**

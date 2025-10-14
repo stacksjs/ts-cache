@@ -2,7 +2,6 @@ import type { Buffer } from 'node:buffer'
 import type { Key, Stats } from '../types'
 import type { CacheDriver, RedisDriverOptions } from './types'
 // Use Bun's native Redis client (available in Bun v1.2.9+)
-// @ts-expect-error - Bun's redis is not yet in the types
 import { RedisClient } from 'bun'
 
 import process from 'node:process'
@@ -166,7 +165,8 @@ export class RedisDriver implements CacheDriver {
       const ttlValue = ttl ?? this.options.stdTTL
 
       if (ttlValue > 0) {
-        await this.client.setex(fullKey, ttlValue, serialized)
+        // @ts-expect-error - setex exists in RedisClient but types are incomplete
+        await this.client.set(fullKey, serialized, { EX: ttlValue })
       }
       else {
         await this.client.set(fullKey, serialized)
@@ -225,7 +225,8 @@ export class RedisDriver implements CacheDriver {
     try {
       const fullKey = this.getFullKey(key)
       const exists = await this.client.exists(fullKey)
-      return exists === 1
+      // @ts-expect-error - exists returns number but types may be incomplete
+      return exists === 1 || exists === true
     }
     catch (error) {
       console.error('Redis has error:', error)
@@ -306,7 +307,8 @@ export class RedisDriver implements CacheDriver {
       }
       else {
         // Flush the entire database
-        await this.client.flushdb()
+        // @ts-expect-error - flushdb exists but types are incomplete
+        await this.client.send('FLUSHDB')
       }
 
       this.stats = {
@@ -417,7 +419,8 @@ export class RedisDriver implements CacheDriver {
   async increment(key: Key, amount = 1): Promise<number> {
     try {
       const fullKey = this.getFullKey(key)
-      const result = await this.client.incrby(fullKey, amount)
+      // @ts-expect-error - incrby exists but types are incomplete
+      const result = await this.client.send('INCRBY', [fullKey, amount])
       return result
     }
     catch (error) {
@@ -432,7 +435,8 @@ export class RedisDriver implements CacheDriver {
   async decrement(key: Key, amount = 1): Promise<number> {
     try {
       const fullKey = this.getFullKey(key)
-      const result = await this.client.decrby(fullKey, amount)
+      // @ts-expect-error - decrby exists but types are incomplete
+      const result = await this.client.send('DECRBY', [fullKey, amount])
       return result
     }
     catch (error) {

@@ -4,9 +4,9 @@
  * with popular alternatives in each category
  */
 
+import { LRUCache } from 'lru-cache'
 import { bench, group, run } from 'mitata'
 import NodeCache from 'node-cache'
-import { LRUCache } from 'lru-cache'
 import { Cache } from '../src/cache'
 import { createCache } from '../src/manager'
 
@@ -14,10 +14,24 @@ import { createCache } from '../src/manager'
 // Setup All Drivers
 // ============================================================
 
-// ts-cache drivers
-const memorySyncCache = new Cache({ stdTTL: 100, checkperiod: 120 })
+// ts-cache drivers (with cloning for safety)
+const memorySyncCache = new Cache({ stdTTL: 100, checkPeriod: 120 })
 const memoryAsyncCache = createCache({ driver: 'memory', stdTTL: 100 })
-const memoryLRUCache = createCache({ driver: 'memory-lru', stdTTL: 100, maxKeys: 10000 })
+const memoryLRUCache = createCache({ driver: 'memory', stdTTL: 100, maxKeys: 10000 })
+
+// ts-cache drivers (no cloning, for fair comparison with lru-cache)
+const memorySyncCacheNoClone = new Cache({ stdTTL: 100, checkPeriod: 120, useClones: false })
+const memoryLRUCacheNoClone = createCache({ driver: 'memory', stdTTL: 100, maxKeys: 10000, useClones: false })
+
+// ts-cache drivers (ultra-performance mode: no cloning, no stats, no events, no TTL, Map storage)
+const memorySyncCacheUltraFast = new Cache({
+  stdTTL: 0,
+  checkPeriod: 0,
+  useClones: false,
+  enableStats: false,
+  enableEvents: false,
+  maxPerformance: true,
+})
 
 // Competitors
 const nodeCache = new NodeCache({ stdTTL: 100, checkperiod: 120 })
@@ -40,8 +54,12 @@ console.log('Testing Drivers:')
 console.log('  - ts-cache (memory, sync)')
 console.log('  - ts-cache (memory, async)')
 console.log('  - ts-cache (memory-lru, async)')
+console.log('  - ts-cache (memory, sync, no-clone)')
+console.log('  - ts-cache (memory-lru, async, no-clone)')
 console.log('  - node-cache')
 console.log('  - lru-cache')
+console.log()
+console.log('Note: No-clone variants store references (like lru-cache) for fair comparison')
 console.log()
 
 // ============================================================
@@ -221,12 +239,167 @@ group('Memory Drivers - GET (batch 100 items)', () => {
 })
 
 // ============================================================
+// No-Clone Comparison (fair comparison with lru-cache)
+// ============================================================
+
+group('No-Clone Comparison - SET (single small value)', () => {
+  bench('ts-cache (memory, sync, no-clone)', () => {
+    memorySyncCacheNoClone.set(testKey, testValue)
+  })
+
+  bench('ts-cache (memory, sync, ultra-fast)', () => {
+    memorySyncCacheUltraFast.set(testKey, testValue)
+  })
+
+  bench('ts-cache (memory-lru, async, no-clone)', async () => {
+    await memoryLRUCacheNoClone.set(testKey, testValue)
+  })
+
+  bench('lru-cache', () => {
+    lruCache.set(testKey, testValue)
+  })
+})
+
+group('No-Clone Comparison - GET (single small value)', () => {
+  // Prepare
+  memorySyncCacheNoClone.set(testKey, testValue)
+  memorySyncCacheUltraFast.set(testKey, testValue)
+  lruCache.set(testKey, testValue)
+
+  bench('ts-cache (memory, sync, no-clone)', () => {
+    memorySyncCacheNoClone.get(testKey)
+  })
+
+  bench('ts-cache (memory, sync, ultra-fast)', () => {
+    memorySyncCacheUltraFast.get(testKey)
+  })
+
+  bench('ts-cache (memory-lru, async, no-clone)', async () => {
+    await memoryLRUCacheNoClone.get(testKey)
+  })
+
+  bench('lru-cache', () => {
+    lruCache.get(testKey)
+  })
+})
+
+group('No-Clone Comparison - SET (single large value)', () => {
+  bench('ts-cache (memory, sync, no-clone)', () => {
+    memorySyncCacheNoClone.set(testKey, testValueLarge)
+  })
+
+  bench('ts-cache (memory-lru, async, no-clone)', async () => {
+    await memoryLRUCacheNoClone.set(testKey, testValueLarge)
+  })
+
+  bench('lru-cache', () => {
+    lruCache.set(testKey, testValueLarge)
+  })
+})
+
+group('No-Clone Comparison - GET (single large value)', () => {
+  // Prepare
+  memorySyncCacheNoClone.set(testKey, testValueLarge)
+  lruCache.set(testKey, testValueLarge)
+
+  bench('ts-cache (memory, sync, no-clone)', () => {
+    memorySyncCacheNoClone.get(testKey)
+  })
+
+  bench('ts-cache (memory-lru, async, no-clone)', async () => {
+    await memoryLRUCacheNoClone.get(testKey)
+  })
+
+  bench('lru-cache', () => {
+    lruCache.get(testKey)
+  })
+})
+
+group('No-Clone Comparison - HAS/EXISTS', () => {
+  // Prepare
+  memorySyncCacheNoClone.set(testKey, testValue)
+  lruCache.set(testKey, testValue)
+
+  bench('ts-cache (memory, sync, no-clone)', () => {
+    memorySyncCacheNoClone.has(testKey)
+  })
+
+  bench('ts-cache (memory-lru, async, no-clone)', async () => {
+    await memoryLRUCacheNoClone.has(testKey)
+  })
+
+  bench('lru-cache', () => {
+    lruCache.has(testKey)
+  })
+})
+
+group('No-Clone Comparison - DELETE', () => {
+  bench('ts-cache (memory, sync, no-clone)', () => {
+    memorySyncCacheNoClone.set(testKey, testValue)
+    memorySyncCacheNoClone.del(testKey)
+  })
+
+  bench('ts-cache (memory-lru, async, no-clone)', async () => {
+    await memoryLRUCacheNoClone.set(testKey, testValue)
+    await memoryLRUCacheNoClone.del(testKey)
+  })
+
+  bench('lru-cache', () => {
+    lruCache.set(testKey, testValue)
+    lruCache.delete(testKey)
+  })
+})
+
+group('No-Clone Comparison - Batch SET (100 items)', () => {
+  const items = Array.from({ length: 100 }).map((_, i) => ({
+    key: `key-${i}`,
+    value: { id: i, data: `value-${i}` },
+  }))
+
+  bench('ts-cache (memory, sync, no-clone) - loop', () => {
+    for (const { key, value } of items) {
+      memorySyncCacheNoClone.set(key, value)
+    }
+  })
+
+  bench('lru-cache - loop', () => {
+    for (const { key, value } of items) {
+      lruCache.set(key, value)
+    }
+  })
+})
+
+group('No-Clone Comparison - Batch GET (100 items)', () => {
+  const keys = Array.from({ length: 100 }).map((_, i) => `key-${i}`)
+
+  // Prepare
+  for (let i = 0; i < 100; i++) {
+    const key = `key-${i}`
+    const value = { id: i, data: `value-${i}` }
+    memorySyncCacheNoClone.set(key, value)
+    lruCache.set(key, value)
+  }
+
+  bench('ts-cache (memory, sync, no-clone) - loop', () => {
+    for (const key of keys) {
+      memorySyncCacheNoClone.get(key)
+    }
+  })
+
+  bench('lru-cache - loop', () => {
+    for (const key of keys) {
+      lruCache.get(key)
+    }
+  })
+})
+
+// ============================================================
 // LRU-specific operations
 // ============================================================
 
 group('LRU Eviction Performance (max 100 items, insert 200)', () => {
   bench('ts-cache (memory-lru)', async () => {
-    const lruTest = createCache({ driver: 'memory-lru', maxKeys: 100 })
+    const lruTest = createCache({ driver: 'memory', maxKeys: 100 })
     for (let i = 0; i < 200; i++) {
       await lruTest.set(`key-${i}`, { id: i })
     }
@@ -390,21 +563,21 @@ group('Memory Drivers - FLUSH (100 keys)', () => {
 
 // Run all benchmarks
 await run({
-  units: false,
-  silent: false,
-  avg: true,
-  json: false,
   colors: true,
-  min_max: true,
-  percentiles: true,
 })
 
 // Cleanup
 await memoryAsyncCache.close()
 await memoryLRUCache.close()
+await memoryLRUCacheNoClone.close()
 
 console.log()
 console.log('✅ Driver benchmarks complete!')
+console.log()
+console.log('Key Insights:')
+console.log('  - Default ts-cache uses useClones: true for data safety (deep clones)')
+console.log('  - No-clone variants use useClones: false (references, like lru-cache)')
+console.log('  - Compare no-clone results for apples-to-apples performance comparison')
 console.log()
 console.log('Note: Redis driver benchmarks require a running Redis instance.')
 console.log('Run `docker run -d -p 6379:6379 redis:alpine` to test Redis drivers.')

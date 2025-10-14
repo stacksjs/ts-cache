@@ -222,6 +222,12 @@ export const DEFAULT_OPTIONS: Options = {
   enableLegacyCallbacks: false,
   // max amount of keys that are being stored
   maxKeys: -1,
+  // enable statistics tracking (hits, misses, keys, sizes)
+  enableStats: true,
+  // enable event emission (set, get, del, expired)
+  enableEvents: true,
+  // use Map for better performance on large caches
+  maxPerformance: false,
 }
 
 /**
