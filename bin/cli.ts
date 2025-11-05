@@ -13,8 +13,8 @@ const cli = new CLI('cache')
 
 cli
   .command('get <key>', 'Get a value from the cache')
-  .option('--driver <driver>', 'Cache driver to use (memory, memory-lru, redis)', 'memory')
-  .option('--prefix <prefix>', 'Key prefix', '')
+  .option('--driver <driver>', 'Cache driver to use (memory, memory-lru, redis)', { default: 'memory' })
+  .option('--prefix <prefix>', 'Key prefix', { default: '' })
   .option('--json', 'Output as JSON')
   .example('cache get user:123')
   .example('cache get user:123 --driver redis')
@@ -52,9 +52,9 @@ cli
 
 cli
   .command('set <key> <value>', 'Set a value in the cache')
-  .option('--driver <driver>', 'Cache driver to use', 'memory')
-  .option('--prefix <prefix>', 'Key prefix', '')
-  .option('--ttl <seconds>', 'Time to live in seconds', '0')
+  .option('--driver <driver>', 'Cache driver to use', { default: 'memory' })
+  .option('--prefix <prefix>', 'Key prefix', { default: '' })
+  .option('--ttl <seconds>', 'Time to live in seconds', { default: '0' })
   .option('--json', 'Parse value as JSON')
   .example('cache set user:123 "John Doe"')
   .example('cache set user:123 \'{"name":"John"}\' --json')
@@ -86,8 +86,8 @@ cli
 
 cli
   .command('del <keys...>', 'Delete one or more keys from the cache')
-  .option('--driver <driver>', 'Cache driver to use', 'memory')
-  .option('--prefix <prefix>', 'Key prefix', '')
+  .option('--driver <driver>', 'Cache driver to use', { default: 'memory' })
+  .option('--prefix <prefix>', 'Key prefix', { default: '' })
   .example('cache del user:123')
   .example('cache del user:123 user:456 session:abc')
   .action(async (keys: string[], options?: { driver?: string, prefix?: string }) => {
@@ -111,8 +111,8 @@ cli
 
 cli
   .command('has <key>', 'Check if a key exists in the cache')
-  .option('--driver <driver>', 'Cache driver to use', 'memory')
-  .option('--prefix <prefix>', 'Key prefix', '')
+  .option('--driver <driver>', 'Cache driver to use', { default: 'memory' })
+  .option('--prefix <prefix>', 'Key prefix', { default: '' })
   .example('cache has user:123')
   .action(async (key: string, options?: { driver?: string, prefix?: string }) => {
     try {
@@ -142,8 +142,8 @@ cli
 
 cli
   .command('keys [pattern]', 'List all keys in the cache')
-  .option('--driver <driver>', 'Cache driver to use', 'memory')
-  .option('--prefix <prefix>', 'Key prefix', '')
+  .option('--driver <driver>', 'Cache driver to use', { default: 'memory' })
+  .option('--prefix <prefix>', 'Key prefix', { default: '' })
   .option('--json', 'Output as JSON')
   .example('cache keys')
   .example('cache keys "user:*"')
@@ -175,8 +175,8 @@ cli
 
 cli
   .command('flush', 'Clear all keys from the cache')
-  .option('--driver <driver>', 'Cache driver to use', 'memory')
-  .option('--prefix <prefix>', 'Key prefix', '')
+  .option('--driver <driver>', 'Cache driver to use', { default: 'memory' })
+  .option('--prefix <prefix>', 'Key prefix', { default: '' })
   .option('--force', 'Skip confirmation prompt')
   .example('cache flush')
   .example('cache flush --force')
@@ -207,8 +207,8 @@ cli
 
 cli
   .command('ttl <key>', 'Get the TTL (time to live) of a key')
-  .option('--driver <driver>', 'Cache driver to use', 'memory')
-  .option('--prefix <prefix>', 'Key prefix', '')
+  .option('--driver <driver>', 'Cache driver to use', { default: 'memory' })
+  .option('--prefix <prefix>', 'Key prefix', { default: '' })
   .option('--json', 'Output as JSON')
   .example('cache ttl user:123')
   .action(async (key: string, options?: { driver?: string, prefix?: string, json?: boolean }) => {
@@ -255,8 +255,8 @@ cli
 
 cli
   .command('stats', 'Show cache statistics')
-  .option('--driver <driver>', 'Cache driver to use', 'memory')
-  .option('--prefix <prefix>', 'Key prefix', '')
+  .option('--driver <driver>', 'Cache driver to use', { default: 'memory' })
+  .option('--prefix <prefix>', 'Key prefix', { default: '' })
   .option('--json', 'Output as JSON')
   .example('cache stats')
   .example('cache stats --json')
@@ -344,7 +344,7 @@ cli
 
 cli
   .command('test', 'Test cache connectivity')
-  .option('--driver <driver>', 'Cache driver to use', 'memory')
+  .option('--driver <driver>', 'Cache driver to use', { default: 'memory' })
   .example('cache test')
   .example('cache test --driver redis')
   .action(async (options?: { driver?: string }) => {
