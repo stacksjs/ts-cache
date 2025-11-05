@@ -6,13 +6,20 @@ import { DEFAULT_OPTIONS, ERROR_MESSAGES } from './config'
 /**
  * Fast deep clone using structuredClone (fastest option in modern runtimes)
  * Falls back to JSON parse/stringify if structuredClone is not available
+ * Returns original value if cloning fails (e.g., functions, non-clonable objects)
  */
 function fastClone<T>(value: T): T {
-  if (typeof structuredClone !== 'undefined') {
-    return structuredClone(value)
+  try {
+    if (typeof structuredClone !== 'undefined') {
+      return structuredClone(value)
+    }
+    // Fallback for older environments
+    return JSON.parse(JSON.stringify(value))
   }
-  // Fallback for older environments
-  return JSON.parse(JSON.stringify(value))
+  catch {
+    // If cloning fails (e.g., functions, non-serializable objects), return original value
+    return value
+  }
 }
 
 /**
@@ -133,7 +140,9 @@ export class Cache extends EventEmitter implements ICache {
       this.stats.hits++
 
     // Inline unwrap - avoid function call overhead
-    return this._useClones ? fastClone(data.v) : data.v
+    const value = this._useClones ? fastClone(data.v) : data.v
+    // Return null if value is undefined (consistent with _unwrap behavior)
+    return value !== undefined ? value : null as any
   }
 
   /**
@@ -251,6 +260,11 @@ export class Cache extends EventEmitter implements ICache {
         this.stats.ksize += keyStr.length
         this.stats.keys++
       }
+    }
+
+    // Emit set event
+    if (this._enableEvents) {
+      this.emit('set', keyStr, value)
     }
 
     return true

@@ -63,8 +63,11 @@ export class CacheManager extends EventEmitter {
    * Set a cached value
    */
   async set<T>(key: Key, value: T, ttl?: number): Promise<boolean> {
-    // Direct driver call for performance
-    return await this.driver.set(key, value, ttl)
+    const result = await this.driver.set(key, value, ttl)
+    if (result) {
+      this.emit('set', key, value, ttl)
+    }
+    return result
   }
 
   /**
@@ -79,8 +82,11 @@ export class CacheManager extends EventEmitter {
    * Delete one or more keys
    */
   async del(keys: Key | Key[]): Promise<number> {
-    // Direct driver call for performance
-    return await this.driver.del(keys)
+    const count = await this.driver.del(keys)
+    if (count > 0) {
+      this.emit('del', keys, count)
+    }
+    return count
   }
 
   /**

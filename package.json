@@ -76,5 +76,9 @@
       }
     },
     "commit-msg": "bunx gitlint --edit .git/COMMIT_EDITMSG"
+  },
+  "dependencies": {
+    "bunfig": "^0.15.6",
+    "clone": "^2.1.2"
   }
 }
