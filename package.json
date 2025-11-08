@@ -64,7 +64,7 @@
   "devDependencies": {
     "@stacksjs/eslint-config": "^4.14.0-beta.3",
     "@types/clone": "^2.1.4",
-    "better-dx": "^0.2.0",
+    "better-dx": "^0.2.3",
     "ioredis": "^5.8.2",
     "lru-cache": "^11.2.2",
     "mitata": "^1.0.34",
