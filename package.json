@@ -70,8 +70,7 @@
     "mitata": "^1.0.34",
     "node-cache": "^5.1.2",
     "redis": "^5.9.0",
-    "ts-clone": "^0.1.1",
-    "typescript": "^5.9.3"
+    "ts-clone": "^0.1.1"
   },
   "git-hooks": {
     "pre-commit": {
