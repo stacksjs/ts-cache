@@ -64,12 +64,12 @@
   "devDependencies": {
     "@stacksjs/eslint-config": "^4.14.0-beta.3",
     "@types/clone": "^2.1.4",
-    "better-dx": "^0.2.3",
-    "ioredis": "^5.8.2",
-    "lru-cache": "^11.2.2",
+    "better-dx": "^0.2.5",
+    "ioredis": "^5.9.2",
+    "lru-cache": "^11.2.5",
     "mitata": "^1.0.34",
     "node-cache": "^5.1.2",
-    "redis": "^5.9.0",
+    "redis": "^5.10.0",
     "ts-clone": "^0.1.1"
   },
   "git-hooks": {
