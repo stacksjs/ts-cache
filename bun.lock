@@ -11,12 +11,12 @@
       "devDependencies": {
         "@stacksjs/eslint-config": "^4.14.0-beta.3",
         "@types/clone": "^2.1.4",
-        "better-dx": "^0.2.3",
-        "ioredis": "^5.8.2",
-        "lru-cache": "^11.2.2",
+        "better-dx": "^0.2.5",
+        "ioredis": "^5.9.2",
+        "lru-cache": "^11.2.6",
         "mitata": "^1.0.34",
         "node-cache": "^5.1.2",
-        "redis": "^5.9.0",
+        "redis": "^5.10.0",
         "ts-clone": "^0.1.1",
       },
     },
@@ -684,7 +684,7 @@
 
     "longest-streak": ["longest-streak@3.1.0", "", {}, "sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g=="],
 
-    "lru-cache": ["lru-cache@11.2.4", "", {}, "sha512-B5Y16Jr9LB9dHVkh6ZevG+vAbOsNOYCX+sXvFWFu7B3Iz5mijW3zdbMyhsh8ANd2mSWBYdJgnqi+mL7/LrOPYg=="],
+    "lru-cache": ["lru-cache@11.2.6", "", {}, "sha512-ESL2CrkS/2wTPfuend7Zhkzo2u0daGJ/A2VucJOgQ/C48S/zB8MMeMHSGKYpXhIjbPxfuezITkaBH1wqv00DDQ=="],
 
     "magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
 
