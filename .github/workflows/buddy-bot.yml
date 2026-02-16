@@ -2,8 +2,8 @@ name: Buddy Bot
 
 on:
   schedule:
-    # Check for rebase requests every minute
-    - cron: '*/1 * * * *'
+    # Check for rebase requests every 20 minutes
+    - cron: '*/20 * * * *'
     # Update dependencies every 2 hours
     - cron: '0 */2 * * *'
     # Update dashboard 15 minutes after dependency updates (ensures updates are reflected)
@@ -103,7 +103,7 @@ jobs:
             fi
           elif [ "${{ github.event_name }}" = "schedule" ]; then
             # Determine based on cron schedule
-            if [ "${{ github.event.schedule }}" = "*/1 * * * *" ]; then
+            if [ "${{ github.event.schedule }}" = "*/20 * * * *" ]; then
               echo "run_check=true" >> $GITHUB_OUTPUT
             elif [ "${{ github.event.schedule }}" = "0 */2 * * *" ]; then
               echo "run_update=true" >> $GITHUB_OUTPUT
@@ -119,7 +119,7 @@ jobs:
     if: ${{ needs.determine-jobs.outputs.run_check == 'true' || needs.determine-jobs.outputs.run_update == 'true' || needs.determine-jobs.outputs.run_dashboard == 'true' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v5.0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0 # Fetch full history for rebasing
@@ -130,7 +130,7 @@ jobs:
 
       - name: Setup PHP and Composer (if needed)
         if: ${{ hashFiles('composer.json') != '' }}
-        uses: shivammathur/setup-php@2.35.5
+        uses: shivammathur/setup-php@2.36.0
         with:
           php-version: '8.4'
           tools: composer
@@ -156,7 +156,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v5.0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
@@ -221,7 +221,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ github.event_name }}" = "schedule" ]; then
-            echo "⏰ **Scheduled Check**: Automatically checks every minute" >> $GITHUB_STEP_SUMMARY
+            echo "⏰ **Scheduled Check**: Automatically checks every 20 minutes" >> $GITHUB_STEP_SUMMARY
           else
             echo "🖱️ **Manual Check**: Manually triggered from Actions tab" >> $GITHUB_STEP_SUMMARY
           fi
@@ -237,7 +237,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v5.0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
@@ -248,7 +248,7 @@ jobs:
 
       - name: Setup PHP and Composer (if needed)
         if: ${{ hashFiles('composer.json') != '' }}
-        uses: shivammathur/setup-php@2.35.5
+        uses: shivammathur/setup-php@2.36.0
         with:
           php-version: '8.4'
           tools: composer
@@ -346,7 +346,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v5.0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
