@@ -157,8 +157,8 @@ export function cacheMiddleware<TArgs extends any[], TReturn>(
   ttl?: number,
 ): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => PropertyDescriptor {
   return function (
-    target: any,
-    propertyKey: string,
+    _target: any,
+    _propertyKey: string,
     descriptor: PropertyDescriptor,
   ): PropertyDescriptor {
     const originalMethod = descriptor.value

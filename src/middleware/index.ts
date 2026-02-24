@@ -172,7 +172,7 @@ export function retryMiddleware(
   initialDelay = 100,
   maxDelay = 5000,
 ): Middleware {
-  return async (context, next) => {
+  return async (_context, next) => {
     let lastError: Error | undefined
     let delay = initialDelay
 
@@ -377,6 +377,7 @@ export function createMiddlewareCache(cache: CacheManager): CacheManager & { mid
 
       // Wrap cache methods with middleware
       if (['get', 'set', 'del', 'has', 'flush'].includes(prop as string)) {
+        // eslint-disable-next-line no-unused-vars
         return async function (this: CacheManager, ...args: any[]) {
           const context: MiddlewareContext = {
             key: args[0],

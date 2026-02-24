@@ -56,7 +56,7 @@ async function middlewareExample() {
   // Add metrics middleware
   const metrics: Record<string, number[]> = {}
   cache.middleware.use(
-    metricsMiddleware((operation, key, duration) => {
+    metricsMiddleware((operation, _key, duration) => {
       if (!metrics[operation]) {
         metrics[operation] = []
       }
