@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@types/clone": "^2.1.4",
-    "better-dx": "^0.2.6",
+    "better-dx": "^0.2.7",
     "ioredis": "^5.10.0",
     "lru-cache": "^11.2.6",
     "mitata": "^1.0.34",
