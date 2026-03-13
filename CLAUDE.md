@@ -2,7 +2,7 @@
 
 ## About
 
-Simple and fast TypeScript in-memory caching. Modern TypeScript port of node-cache.
+A high-performance, type-safe caching library for TypeScript with support for multiple storage drivers (in-memory, memory-LRU, and Redis via Bun's native client). It provides flexible TTL strategies, batch operations, a tagging system, built-in caching patterns (cache-aside, read-through, write-through, write-behind, refresh-ahead, multi-level), rate limiting, distributed locking, memoization, and a CLI tool. In ultra-fast mode, it outperforms lru-cache on both GET and SET operations.
 
 ## Linting
 
