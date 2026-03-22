@@ -38,9 +38,6 @@
   },
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "cache": "./dist/bin/cli.js"
-  },
   "files": [
     "README.md",
     "dist"
