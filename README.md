@@ -27,6 +27,7 @@ A high-performance, type-safe caching library for TypeScript and JavaScript appl
 **ts-cache can be faster than lru-cache!** 🏆
 
 With ultra-fast mode enabled, ts-cache achieves:
+
 - **GET: 3.90 ns** (3.2x faster than lru-cache's 12.37 ns)
 - **SET: 30.24 ns** (1.3x faster than lru-cache's 39.52 ns)
 
@@ -502,10 +503,10 @@ const config: CacheConfig = {
 
   // Redis Configuration
   redis: {
-    url: process.env.REDIS_URL,
+    url: process.env.REDIS*URL,
     host: 'localhost',
     port: 6379,
-    password: process.env.REDIS_PASSWORD,
+    password: process.env.REDIS*PASSWORD,
     database: 0,
   },
 
@@ -754,8 +755,8 @@ We would like to extend our thanks to the following sponsors for funding Stacks 
 
 ## Credits
 
-- [`node-cache`](https://github.com/node-cache/node-cache) _for the original Node.js implementation_
-- [Bun](https://bun.sh) _for the native Redis client_
+- [`node-cache`](https://github.com/node-cache/node-cache) *for the original Node.js implementation*
+- [Bun](https://bun.sh) *for the native Redis client*
 - [Chris Breuer](https://github.com/chrisbbreuer)
 - [All Contributors](https://github.com/stacksjs/ts-cache/contributors)
 

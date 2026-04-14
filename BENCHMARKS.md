@@ -12,7 +12,7 @@ Performance benchmarks comparing ts-cache with popular alternatives.
 
 | Driver | GET | SET | Use Case |
 |--------|-----|-----|----------|
-| **ts-cache (ultra-fast)** | **3.90 ns** 🥇 | **30 ns** 🥇 | Maximum speed |
+| **ts-cache (ultra-fast)**|**3.90 ns**🥇 |**30 ns** 🥇 | Maximum speed |
 | lru-cache | 12 ns | 40 ns | Standard LRU |
 | ts-cache (no-clone) | 38 ns | 218 ns | Features + speed |
 | ts-cache (default) | 630 ns | 532 ns | Full features |
@@ -24,7 +24,7 @@ Performance benchmarks comparing ts-cache with popular alternatives.
 
 | Client | GET | SET | Batch GET (100) |
 |--------|-----|-----|-----------------|
-| **ts-cache** | 19.7 µs | 19.7 µs | **61 µs** 🥇 |
+| **ts-cache**| 19.7 µs | 19.7 µs |**61 µs** 🥇 |
 | Bun native | 18.4 µs | 19.0 µs | 80 µs |
 | ioredis | 21.3 µs | 19.7 µs | 91 µs |
 | node-redis | 21.7 µs | 22.0 µs | 118 µs |

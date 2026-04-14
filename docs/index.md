@@ -29,5 +29,3 @@ features:
     icon: "📊"
     details: "Built-in statistics, memory usage estimation, and event-based tracking."
 ---
-
-<Home />

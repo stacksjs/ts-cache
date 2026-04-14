@@ -102,7 +102,7 @@ async function getUserDataWithFetch(userId: string) {
 }
 ```
 
-## Why ts-cache?
+## Why ts-cache
 
 1. **Modern**: Built with TypeScript for modern applications
 2. **Type-Safe**: Full type safety with generics for better developer experience

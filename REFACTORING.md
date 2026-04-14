@@ -63,6 +63,7 @@ await cache.set('key', 'value', 3600)
 ```
 
 Features:
+
 - Connection management (auto-reconnect, retries)
 - TLS support
 - Pub/Sub support (via Bun's Redis client)
@@ -253,6 +254,7 @@ const value = cache.get('key')
    ```
 
 2. **Add async/await**:
+
    ```typescript
    // Old
    cache.set('key', 'value')
@@ -264,6 +266,7 @@ const value = cache.get('key')
    ```
 
 3. **Update configuration** (optional):
+
    ```typescript
    const cache = createCache({
      driver: 'memory', // or 'redis'
