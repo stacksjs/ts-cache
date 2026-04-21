@@ -66,11 +66,11 @@
   "devDependencies": {
     "@types/clone": "^2.1.4",
     "better-dx": "^0.2.7",
-    "ioredis": "^5.10.0",
-    "lru-cache": "^11.2.7",
+    "ioredis": "^5.10.1",
+    "lru-cache": "^11.3.5",
     "mitata": "^1.0.34",
     "node-cache": "^5.1.2",
-    "redis": "^5.11.0",
+    "redis": "^5.12.1",
     "ts-clone": "^0.1.1"
   },
   "git-hooks": {
