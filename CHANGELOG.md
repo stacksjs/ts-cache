@@ -1,3 +1,74 @@
+[Compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.3...v0.1.4)
+
+### 🐛 Bug Fixes
+
+- publish valid cache declarations ([26ebd4e](https://github.com/stacksjs/ts-cache/commit/26ebd4e))
+
+### 🧹 Chores
+
+- release v0.1.4 ([6f4403f](https://github.com/stacksjs/ts-cache/commit/6f4403f))
+- use Pantry action for publish-commit and add job dependencies ([ec7c160](https://github.com/stacksjs/ts-cache/commit/ec7c160))
+- **deps**: update all non-major dependencies (rebased) (#3071) ([e0f16d4](https://github.com/stacksjs/ts-cache/commit/e0f16d4)) ([#3071](https://github.com/stacksjs/ts-cache/issues/3071), [#3071](https://github.com/stacksjs/ts-cache/issues/3071))
+- update better-dx to ^0.2.7 ([6b50b74](https://github.com/stacksjs/ts-cache/commit/6b50b74))
+- enrich CLAUDE.md with detailed project context from README ([739cd2f](https://github.com/stacksjs/ts-cache/commit/739cd2f))
+- update CLAUDE.md with project context and crosswind details ([640f160](https://github.com/stacksjs/ts-cache/commit/640f160))
+- add proper claude code guidelines ([572511e](https://github.com/stacksjs/ts-cache/commit/572511e))
+- use pantry monorepo action instead of pantry-setup ([33f84fa](https://github.com/stacksjs/ts-cache/commit/33f84fa))
+- **deps**: update all non-major dependencies (#3070) ([4da7fd7](https://github.com/stacksjs/ts-cache/commit/4da7fd7)) ([#3070](https://github.com/stacksjs/ts-cache/issues/3070), [#3070](https://github.com/stacksjs/ts-cache/issues/3070))
+- wip ([3b477da](https://github.com/stacksjs/ts-cache/commit/3b477da))
+- wip ([2f71856](https://github.com/stacksjs/ts-cache/commit/2f71856))
+- wip ([bb3048b](https://github.com/stacksjs/ts-cache/commit/bb3048b))
+- wip ([903a9cf](https://github.com/stacksjs/ts-cache/commit/903a9cf))
+- wip ([ec997c1](https://github.com/stacksjs/ts-cache/commit/ec997c1))
+- wip ([b74a3f0](https://github.com/stacksjs/ts-cache/commit/b74a3f0))
+- wip ([8c92eb4](https://github.com/stacksjs/ts-cache/commit/8c92eb4))
+- wip ([531c223](https://github.com/stacksjs/ts-cache/commit/531c223))
+- wip ([6e89dad](https://github.com/stacksjs/ts-cache/commit/6e89dad))
+- wip ([daa5f3f](https://github.com/stacksjs/ts-cache/commit/daa5f3f))
+- wip ([3159ab9](https://github.com/stacksjs/ts-cache/commit/3159ab9))
+- wip ([e8f0d04](https://github.com/stacksjs/ts-cache/commit/e8f0d04))
+- wip ([8ac4c6e](https://github.com/stacksjs/ts-cache/commit/8ac4c6e))
+
+### Contributors
+
+- Chris <chrisbreuer93@gmail.com>
+- glennmichael123 <gtorregosa@gmail.com>
+
+[Compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.3...HEAD)
+
+### 🐛 Bug Fixes
+
+- publish valid cache declarations ([26ebd4e](https://github.com/stacksjs/ts-cache/commit/26ebd4e))
+
+### 🧹 Chores
+
+- use Pantry action for publish-commit and add job dependencies ([ec7c160](https://github.com/stacksjs/ts-cache/commit/ec7c160))
+- **deps**: update all non-major dependencies (rebased) (#3071) ([e0f16d4](https://github.com/stacksjs/ts-cache/commit/e0f16d4)) ([#3071](https://github.com/stacksjs/ts-cache/issues/3071), [#3071](https://github.com/stacksjs/ts-cache/issues/3071))
+- update better-dx to ^0.2.7 ([6b50b74](https://github.com/stacksjs/ts-cache/commit/6b50b74))
+- enrich CLAUDE.md with detailed project context from README ([739cd2f](https://github.com/stacksjs/ts-cache/commit/739cd2f))
+- update CLAUDE.md with project context and crosswind details ([640f160](https://github.com/stacksjs/ts-cache/commit/640f160))
+- add proper claude code guidelines ([572511e](https://github.com/stacksjs/ts-cache/commit/572511e))
+- use pantry monorepo action instead of pantry-setup ([33f84fa](https://github.com/stacksjs/ts-cache/commit/33f84fa))
+- **deps**: update all non-major dependencies (#3070) ([4da7fd7](https://github.com/stacksjs/ts-cache/commit/4da7fd7)) ([#3070](https://github.com/stacksjs/ts-cache/issues/3070), [#3070](https://github.com/stacksjs/ts-cache/issues/3070))
+- wip ([3b477da](https://github.com/stacksjs/ts-cache/commit/3b477da))
+- wip ([2f71856](https://github.com/stacksjs/ts-cache/commit/2f71856))
+- wip ([bb3048b](https://github.com/stacksjs/ts-cache/commit/bb3048b))
+- wip ([903a9cf](https://github.com/stacksjs/ts-cache/commit/903a9cf))
+- wip ([ec997c1](https://github.com/stacksjs/ts-cache/commit/ec997c1))
+- wip ([b74a3f0](https://github.com/stacksjs/ts-cache/commit/b74a3f0))
+- wip ([8c92eb4](https://github.com/stacksjs/ts-cache/commit/8c92eb4))
+- wip ([531c223](https://github.com/stacksjs/ts-cache/commit/531c223))
+- wip ([6e89dad](https://github.com/stacksjs/ts-cache/commit/6e89dad))
+- wip ([daa5f3f](https://github.com/stacksjs/ts-cache/commit/daa5f3f))
+- wip ([3159ab9](https://github.com/stacksjs/ts-cache/commit/3159ab9))
+- wip ([e8f0d04](https://github.com/stacksjs/ts-cache/commit/e8f0d04))
+- wip ([8ac4c6e](https://github.com/stacksjs/ts-cache/commit/8ac4c6e))
+
+### Contributors
+
+- Chris <chrisbreuer93@gmail.com>
+- glennmichael123 <gtorregosa@gmail.com>
+
 [Compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.2...v0.1.3)
 
 ### 🧹 Chores
