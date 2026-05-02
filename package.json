@@ -38,6 +38,9 @@
   },
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "cache": "./dist/bin/cli.js"
+  },
   "files": [
     "README.md",
     "dist"
@@ -54,22 +57,27 @@
     "changelog": "bunx logsmith --verbose",
     "changelog:generate": "bunx logsmith --output CHANGELOG.md",
     "release": "bun --bun run changelog:generate && bunx --bun bumpx prompt --recursive",
+    "release:patch": "bun --bun run changelog:generate && bunx --bun bumpx patch --recursive --yes",
+    "publish:patch": "bun --bun run changelog:generate && bunx --bun bumpx patch --recursive --yes",
     "dev:docs": "bun --bun vitepress dev docs",
     "build:docs": "bun --bun vitepress build docs",
     "preview:docs": "bun --bun vitepress preview docs",
     "typecheck": "bun --bun tsc --noEmit"
   },
   "dependencies": {
-    "bunfig": "^0.15.6",
+    "@stacksjs/clapp": "^0.2.5",
+    "bunfig": "^0.15.11",
     "clone": "^2.1.2"
   },
   "devDependencies": {
     "@types/clone": "^2.1.4",
-    "better-dx": "^0.2.7",
+    "better-dx": "^0.2.11",
+    "bun-plugin-dtsx": "^0.9.14",
     "ioredis": "^5.10.0",
     "lru-cache": "^11.2.7",
     "mitata": "^1.0.34",
     "node-cache": "^5.1.2",
+    "pickier": "^0.1.28",
     "redis": "^5.11.0",
     "ts-clone": "^0.1.1"
   },
