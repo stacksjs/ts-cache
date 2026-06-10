@@ -65,19 +65,19 @@
     "typecheck": "bun --bun tsc --noEmit"
   },
   "dependencies": {
-    "@stacksjs/clapp": "^0.2.5",
-    "bunfig": "^0.15.11",
+    "@stacksjs/clapp": "^0.2.10",
+    "bunfig": "^0.15.14",
     "clone": "^2.1.2"
   },
   "devDependencies": {
     "@types/clone": "^2.1.4",
     "better-dx": "^0.2.15",
-    "bun-plugin-dtsx": "^0.9.14",
-    "ioredis": "^5.10.0",
-    "lru-cache": "^11.2.7",
+    "bun-plugin-dtsx": "^0.21.17",
+    "ioredis": "^5.11.1",
+    "lru-cache": "^11.5.1",
     "mitata": "^1.0.34",
     "node-cache": "^5.1.2",
-    "pickier": "^0.1.28",
+    "pickier": "^0.1.35",
     "redis": "^5.11.0",
     "ts-clone": "^0.1.1"
   },
