@@ -25,6 +25,12 @@ export interface CacheManagerOptions extends DriverOptions, Partial<Omit<MemoryD
 export class CacheManager extends EventEmitter {
   private driver: CacheDriver
 
+  /**
+   * In-flight fetcher promises keyed by cache key, used to collapse
+   * concurrent cold-key fetches into a single execution (stampede protection).
+   */
+  private inflight: Map<string, Promise<any>> = new Map()
+
   constructor(options: CacheManagerOptions = {}) {
     super()
 
@@ -119,9 +125,25 @@ export class CacheManager extends EventEmitter {
   }
 
   /**
-   * Get a value and delete it atomically
+   * Get a value and delete it atomically.
+   *
+   * Prefers the driver's native atomic `take` (e.g. Redis GETDEL, or the
+   * memory driver's single-section get+delete) so that concurrent callers
+   * cannot both observe the value. This matters for single-use values such
+   * as OTP / 2FA codes where a get-then-delete race would allow replay.
    */
   async take<T>(key: Key): Promise<T | undefined> {
+    if (this.driver.take) {
+      const value = await this.driver.take<T>(key)
+
+      if (value !== undefined) {
+        this.emit('take', key, value)
+      }
+
+      return value
+    }
+
+    // Fallback for drivers without native atomic take.
     const value = await this.driver.get<T>(key)
 
     if (value !== undefined) {
@@ -146,12 +168,32 @@ export class CacheManager extends EventEmitter {
       return cached
     }
 
-    const value = await fetcher()
-    await this.set(key, value, ttl)
+    // Stampede protection: collapse concurrent cold-key fetches into a single
+    // in-flight execution. Other callers await the same promise instead of
+    // each running the (potentially expensive) fetcher.
+    const keyStr = key.toString()
+    const existing = this.inflight.get(keyStr)
+    if (existing) {
+      return await existing as T
+    }
 
-    this.emit('fetch', key, value, ttl)
+    const promise = (async () => {
+      const value = await fetcher()
+      await this.set(key, value, ttl)
+      this.emit('fetch', key, value, ttl)
+      return value
+    })()
 
-    return value
+    this.inflight.set(keyStr, promise)
+
+    try {
+      return await promise
+    }
+    finally {
+      // Always clear the in-flight entry, including on fetcher errors, so a
+      // failed fetch does not permanently poison the key.
+      this.inflight.delete(keyStr)
+    }
   }
 
   /**
@@ -296,6 +338,9 @@ export class CacheManager extends EventEmitter {
           driver.tag!(`${prefix}:${key}`, tags)
         : undefined,
       deleteByTag: driver.deleteByTag,
+      take: driver.take
+        ? async <T>(key: Key) => driver.take!<T>(`${prefix}:${key}`)
+        : undefined,
     }
 
     return new CacheManager({ customDriver: namespacedDriver })

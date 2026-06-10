@@ -251,6 +251,38 @@ export class MemoryLRUDriver implements CacheDriver {
   }
 
   /**
+   * Atomically get a value and delete it.
+   *
+   * The read and delete happen within a single synchronous section (no
+   * `await` in between), so concurrent callers cannot both observe the value
+   * before it is removed. This is required for single-use values such as
+   * OTP / 2FA codes to prevent replay.
+   */
+  async take<T>(key: Key): Promise<T | undefined> {
+    const fullKey = this.getFullKey(key)
+    const node = this.data.get(fullKey)
+
+    if (!node || !this.checkExpiry(fullKey, node.value)) {
+      this.stats.misses++
+      return undefined
+    }
+
+    const value = this.unwrap<T>(node.value)
+    this.stats.hits++
+
+    this.stats.vsize -= this.getValueSize(this.unwrap(node.value, false))
+    this.stats.ksize -= this.getKeySize(key)
+    this.stats.keys--
+    this.removeNode(node)
+    this.data.delete(fullKey)
+    this.tags.forEach((keySet) => {
+      keySet.delete(fullKey)
+    })
+
+    return value
+  }
+
+  /**
    * Get all keys in the cache
    */
   async keys(pattern?: string): Promise<string[]> {

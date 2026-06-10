@@ -74,12 +74,14 @@ export class MemoryDriver implements CacheDriver {
    * Set a value in the cache
    */
   async set<T>(key: Key, value: T, ttl?: number): Promise<boolean> {
-    if (this.options.maxKeys > -1 && this.stats.keys >= this.options.maxKeys) {
-      throw new Error('Cache max keys amount exceeded')
-    }
-
     const fullKey = this.getFullKey(key)
     const existed = !!this.data[fullKey]
+
+    // Only enforce the key limit when adding a genuinely new key; updating an
+    // existing key does not grow the store and must not be rejected.
+    if (!existed && this.options.maxKeys > -1 && this.stats.keys >= this.options.maxKeys) {
+      throw new Error('Cache max keys amount exceeded')
+    }
 
     if (existed) {
       this.stats.vsize -= this.getValueSize(this.unwrap(this.data[fullKey], false))
@@ -100,8 +102,23 @@ export class MemoryDriver implements CacheDriver {
    * Set multiple values in the cache
    */
   async mset<T>(entries: Array<{ key: Key, value: T, ttl?: number }>): Promise<boolean> {
-    if (this.options.maxKeys > -1 && this.stats.keys + entries.length >= this.options.maxKeys) {
-      throw new Error('Cache max keys amount exceeded')
+    if (this.options.maxKeys > -1) {
+      // Only count keys that don't already exist; updating an existing key
+      // does not grow the store. Use `>` so a batch that exactly fills the
+      // store is allowed.
+      let newKeys = 0
+      const seen = new Set<string>()
+      for (const { key } of entries) {
+        const fullKey = this.getFullKey(key)
+        if (!this.data[fullKey] && !seen.has(fullKey)) {
+          seen.add(fullKey)
+          newKeys++
+        }
+      }
+
+      if (this.stats.keys + newKeys > this.options.maxKeys) {
+        throw new Error('Cache max keys amount exceeded')
+      }
     }
 
     for (const { key, value, ttl } of entries) {
@@ -143,6 +160,38 @@ export class MemoryDriver implements CacheDriver {
   async has(key: Key): Promise<boolean> {
     const fullKey = this.getFullKey(key)
     return !!(this.data[fullKey] && this.checkExpiry(fullKey, this.data[fullKey]))
+  }
+
+  /**
+   * Atomically get a value and delete it.
+   *
+   * The read and delete happen within a single synchronous section (no
+   * `await` in between), so concurrent callers cannot both observe the value
+   * before it is removed. This is required for single-use values such as
+   * OTP / 2FA codes to prevent replay.
+   */
+  async take<T>(key: Key): Promise<T | undefined> {
+    const fullKey = this.getFullKey(key)
+    const entry = this.data[fullKey]
+
+    if (!entry || !this.checkExpiry(fullKey, entry)) {
+      this.stats.misses++
+      return undefined
+    }
+
+    // Read the value, then remove the key before yielding to any other task.
+    const value = this.unwrap<T>(entry)
+    this.stats.hits++
+
+    this.stats.vsize -= this.getValueSize(this.unwrap(entry, false))
+    this.stats.ksize -= this.getKeySize(key)
+    this.stats.keys--
+    delete this.data[fullKey]
+    this.tags.forEach((keySet) => {
+      keySet.delete(fullKey)
+    })
+
+    return value
   }
 
   /**

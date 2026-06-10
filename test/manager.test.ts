@@ -74,6 +74,21 @@ describe('CacheManager', () => {
       expect(await cache.has('to-take')).toBe(false)
     })
 
+    test('should return the value to exactly one concurrent taker (single-use / replay protection)', async () => {
+      // Arrange: a single-use OTP-style value
+      await cache.set('otp', '123456')
+
+      // Act: many concurrent takers race for the same key
+      const results = await Promise.all(
+        Array.from({ length: 50 }, () => cache.take<string>('otp')),
+      )
+
+      // Assert: exactly one caller gets the value, the rest get undefined
+      const winners = results.filter(r => r === '123456')
+      expect(winners.length).toBe(1)
+      expect(await cache.has('otp')).toBe(false)
+    })
+
     test('should flush all cache data', async () => {
       // Arrange
       await cache.set('key1', 'value1')
@@ -239,6 +254,49 @@ describe('CacheManager', () => {
       // Assert
       expect(result).toBe('forever-value')
       expect(await cache.get('forever-key')).toBe('forever-value')
+    })
+
+    test('should collapse concurrent cold-key fetches into one execution (stampede protection)', async () => {
+      // Arrange
+      let computeCount = 0
+      const fetcher = async () => {
+        computeCount++
+        // Simulate an async (e.g. DB) call so all callers overlap on the cold key
+        await new Promise(resolve => setTimeout(resolve, 20))
+        return 'expensive-value'
+      }
+
+      // Act: fire many concurrent requests for the same cold key
+      const results = await Promise.all(
+        Array.from({ length: 25 }, () => cache.fetch('stampede-key', fetcher)),
+      )
+
+      // Assert
+      expect(results.every(r => r === 'expensive-value')).toBe(true)
+      expect(computeCount).toBe(1) // Should only compute once despite 25 callers
+    })
+
+    test('should not permanently poison a key when the fetcher throws', async () => {
+      // Arrange
+      let attempts = 0
+      const failingThenOk = async () => {
+        attempts++
+        if (attempts === 1) {
+          throw new Error('transient failure')
+        }
+        return 'recovered'
+      }
+
+      // Act / Assert: first concurrent batch all see the same rejection
+      const settled = await Promise.allSettled(
+        Array.from({ length: 5 }, () => cache.fetch('poison-key', failingThenOk)),
+      )
+      expect(settled.every(s => s.status === 'rejected')).toBe(true)
+      expect(attempts).toBe(1) // collapsed into a single failing call
+
+      // A subsequent call must be able to retry (in-flight entry was cleared)
+      const result = await cache.fetch('poison-key', failingThenOk)
+      expect(result).toBe('recovered')
     })
   })
 

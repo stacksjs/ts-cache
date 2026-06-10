@@ -106,6 +106,32 @@ describe('MemoryDriver', () => {
       expect(await driver.get('y')).toBe('value-y')
       expect(await driver.get('z')).toBe('value-z')
     })
+
+    test('mset should allow a batch that exactly fills maxKeys and count only new keys', async () => {
+      // Arrange
+      const limited = new MemoryDriver({ maxKeys: 3 })
+
+      // A batch that exactly reaches the limit must be allowed (no off-by-one).
+      await limited.mset([
+        { key: 'a', value: 1 },
+        { key: 'b', value: 2 },
+        { key: 'c', value: 3 },
+      ])
+      expect(await limited.get('a')).toBe(1)
+      expect(await limited.get('c')).toBe(3)
+
+      // Updating existing keys must not be rejected as if they were new.
+      await limited.mset([
+        { key: 'a', value: 10 },
+        { key: 'b', value: 20 },
+      ])
+      expect(await limited.get('a')).toBe(10)
+
+      // Adding a genuinely new key beyond the limit must throw.
+      await expect(limited.mset([{ key: 'd', value: 4 }])).rejects.toThrow()
+
+      await limited.close()
+    })
   })
 
   describe('TTL Operations', () => {

@@ -207,6 +207,13 @@ export interface CacheDriver {
    * Delete keys by tag (optional, driver-specific)
    */
   deleteByTag?: (tag: string) => Promise<number>
+
+  /**
+   * Atomically get a value and delete it (optional, driver-specific).
+   * Used for single-use values such as OTP / 2FA codes where a
+   * get-then-delete race would allow replay.
+   */
+  take?: <T>(key: Key) => Promise<T | undefined>
 }
 
 /**
