@@ -11,6 +11,7 @@ import process from 'node:process'
  */
 export class RedisDriver implements CacheDriver {
   private client: typeof RedisClient.prototype
+  private closing = false
   private options: Required<Omit<RedisDriverOptions, 'compressor' | 'password'>> & {
     compressor?: RedisDriverOptions['compressor']
     password?: string
@@ -67,7 +68,7 @@ export class RedisDriver implements CacheDriver {
     }
 
     client.onclose = (error: Error | undefined) => {
-      if (error) {
+      if (error && !this.closing) {
         console.error('Redis connection closed:', error)
       }
     }
@@ -165,8 +166,7 @@ export class RedisDriver implements CacheDriver {
       const ttlValue = ttl ?? this.options.stdTTL
 
       if (ttlValue > 0) {
-        // @ts-expect-error - setex exists in RedisClient but types are incomplete
-        await this.client.set(fullKey, serialized, { EX: ttlValue })
+        await this.client.set(fullKey, serialized, 'EX', ttlValue)
       }
       else {
         await this.client.set(fullKey, serialized)
@@ -346,6 +346,8 @@ export class RedisDriver implements CacheDriver {
    */
   async close(): Promise<void> {
     try {
+      if (this.closing || !this.client.connected) return
+      this.closing = true
       this.client.close()
     }
     catch (error) {
