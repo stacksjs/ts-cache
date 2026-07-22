@@ -1,3 +1,36 @@
+[Compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.4...v0.1.5)
+
+## 🐛 Bug Fixes
+
+- **redis**: preserve TTL and connection lifecycle ([48caa3d](https://github.com/stacksjs/ts-cache/commit/48caa3d)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **cache**: atomic take, stampede protection, allow updates when full ([d7fa4bf](https://github.com/stacksjs/ts-cache/commit/d7fa4bf)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **scripts**: stop double-generating CHANGELOG on release ([90eab71](https://github.com/stacksjs/ts-cache/commit/90eab71)) _(by Glenn Michael Torregosa <gtorregosa@gmail.com>)_
+- **tsconfig**: exclude docs from typecheck ([0ab76dc](https://github.com/stacksjs/ts-cache/commit/0ab76dc)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🤖 Continuous Integration
+
+- **buddy-bot**: add daily cleanup cron to workflow ([7cb102b](https://github.com/stacksjs/ts-cache/commit/7cb102b)) _(by Glenn Michael Torregosa <gtorregosa@gmail.com>)_
+- **buddy-bot**: regenerate workflow from current template ([dac5012](https://github.com/stacksjs/ts-cache/commit/dac5012)) _(by Glenn Michael Torregosa <gtorregosa@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.5 ([ae51d4c](https://github.com/stacksjs/ts-cache/commit/ae51d4c)) _(by Chris <chrisbreuer93@gmail.com>)_
+- upgrade to TypeScript 7 ([843689a](https://github.com/stacksjs/ts-cache/commit/843689a)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **deps**: refresh bun.lock to pick up pickier 0.1.37 ([3e14d38](https://github.com/stacksjs/ts-cache/commit/3e14d38)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+- **deps**: refresh bun.lock to pick up pickier 0.1.35 ([79bdc39](https://github.com/stacksjs/ts-cache/commit/79bdc39)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+- **deps**: refresh bun.lock to pick up pickier 0.1.33 ([84758a6](https://github.com/stacksjs/ts-cache/commit/84758a6)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+- **deps**: refresh bun.lock to pick up @stacksjs/logsmith 0.2.3 ([05123b8](https://github.com/stacksjs/ts-cache/commit/05123b8)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+- **deps**: refresh bun.lock to pick up buddy-bot 0.9.20 ([715c7da](https://github.com/stacksjs/ts-cache/commit/715c7da)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+- **deps**: bump better-dx to ^0.2.15 ([b1f001c](https://github.com/stacksjs/ts-cache/commit/b1f001c)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+- ignore pantry directory ([d0f0c5a](https://github.com/stacksjs/ts-cache/commit/d0f0c5a)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+- refresh bun.lock to pick up bun-plugin-dtsx@0.9.18 ([312af9a](https://github.com/stacksjs/ts-cache/commit/312af9a)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+- _Glenn Michael Torregosa <gtorregosa@gmail.com>_
+- _glennmichael123 <gtorregosa@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.3...v0.1.4)
 
 ### 🐛 Bug Fixes
