@@ -1,11 +1,9 @@
-import type { BunpressConfig } from 'bunpress'
+import type { BunPressConfig } from '@stacksjs/bunpress'
 
-const config: BunpressConfig = {
-  name: 'ts-cache',
+const config: BunPressConfig = {
+  title: 'ts-cache',
   description: 'High-performance, type-safe caching library for TypeScript',
   url: 'https://ts-cache.stacksjs.org',
-  theme: 'docs',
-
   nav: [
     { text: 'Guide', link: '/guide/getting-started' },
     { text: 'API', link: '/guide/api' },
@@ -47,9 +45,11 @@ const config: BunpressConfig = {
     },
   ],
 
-  socialLinks: [
-    { icon: 'github', link: 'https://github.com/stacksjs/ts-cache' },
-  ],
+  themeConfig: {
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/stacksjs/ts-cache' },
+    ],
+  },
 }
 
 export default config
