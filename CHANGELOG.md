@@ -1,3 +1,21 @@
+[Compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.5...v0.1.6)
+
+## ⚡ Performance Improvements
+
+- **build**: cut the waste out of the published output ([9d332d4](https://github.com/stacksjs/ts-cache/commit/9d332d4)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 📚 Documentation
+
+- link the community as stacksjs.com/discord ([13dcfb0](https://github.com/stacksjs/ts-cache/commit/13dcfb0)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.6 ([0cc956d](https://github.com/stacksjs/ts-cache/commit/0cc956d)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.4...v0.1.5)
 
 ## 🐛 Bug Fixes
