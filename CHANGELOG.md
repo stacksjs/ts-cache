@@ -1,3 +1,17 @@
+[Compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.6...v0.1.7)
+
+## 🐛 Bug Fixes
+
+- **build**: build the CLI the bin field points at ([2f88636](https://github.com/stacksjs/ts-cache/commit/2f88636)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.7 ([480c901](https://github.com/stacksjs/ts-cache/commit/480c901)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.5...v0.1.6)
 
 ## ⚡ Performance Improvements
