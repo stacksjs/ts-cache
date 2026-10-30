@@ -256,6 +256,25 @@ export class RedisDriver implements CacheDriver {
   }
 
   /**
+   * Every key matching `pattern`, which is already prefixed, walked with SCAN.
+   *
+   * KEYS answers in one command that walks the whole keyspace, and the server
+   * serves no other client meanwhile: 76 ms at 1M keys, whatever the pattern
+   * matched (#3094). SCAN makes the same walk in short steps. It may return a
+   * key twice, hence the Set.
+   */
+  private async scan(pattern: string): Promise<string[]> {
+    const found = new Set<string>()
+    let cursor = '0'
+    do {
+      const [next, batch] = await this.client.send('SCAN', [cursor, 'MATCH', pattern, 'COUNT', '1000']) as [string, string[]]
+      for (const key of batch) found.add(key)
+      cursor = String(next)
+    } while (cursor !== '0')
+    return [...found]
+  }
+
+  /**
    * Get all keys in the cache
    */
   async keys(pattern?: string): Promise<string[]> {
@@ -264,7 +283,7 @@ export class RedisDriver implements CacheDriver {
         ? this.getFullKey(pattern)
         : this.getFullKey('*')
 
-      const keys = await this.client.keys(searchPattern)
+      const keys = await this.scan(searchPattern)
       return keys.map((k: string) => this.stripPrefix(k))
     }
     catch (error) {
@@ -320,11 +339,11 @@ export class RedisDriver implements CacheDriver {
   async flush(): Promise<void> {
     try {
       if (this.options.prefix) {
-        // Delete only keys with the prefix
+        // Delete only keys with the prefix, a batch at a time rather than in
+        // one DEL that holds the server for all of them.
         const keys = await this.keys('*')
-        if (keys.length > 0) {
-          await this.del(keys)
-        }
+        for (let i = 0; i < keys.length; i += 1000)
+          await this.del(keys.slice(i, i + 1000))
       }
       else {
         // Flush the entire database
