@@ -59,6 +59,11 @@ export interface RedisDriverOptions extends DriverOptions {
   port?: number
 
   /**
+   * Redis ACL username. Without one, `password` authenticates the default user.
+   */
+  username?: string
+
+  /**
    * Redis password
    */
   password?: string

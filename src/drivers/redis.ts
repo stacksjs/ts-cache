@@ -6,14 +6,48 @@ import { RedisClient } from 'bun'
 
 import process from 'node:process'
 
+/** The options that say which server to reach, short of a whole URL. */
+type ConnectionOptions = Pick<RedisDriverOptions, 'url' | 'host' | 'port' | 'username' | 'password' | 'database' | 'tls'>
+
+/**
+ * The URL a driver connects to.
+ *
+ * An explicit `url` wins. Otherwise any of `host`, `port`, `username`,
+ * `password`, `database` or `tls` builds one, and only when none is given does
+ * `REDIS_URL`, then localhost, apply. `url` used to default to `REDIS_URL` or
+ * localhost before the other options were looked at, so they were never read
+ * and a driver given a host still went to localhost:6379 (#3093).
+ *
+ * An empty string or a `false` is not a setting: config files spell "unset"
+ * that way, and it should leave `REDIS_URL` in charge.
+ */
+export function redisConnectionUrl(options: ConnectionOptions, env: Record<string, string | undefined> = process.env): string {
+  if (options.url)
+    return options.url
+
+  const given = (value: unknown): boolean => value !== undefined && value !== '' && value !== false
+  const { host, port, username, password, database, tls } = options
+  if (![host, port, username, password, database, tls].some(given))
+    return env.REDIS_URL || 'redis://localhost:6379'
+
+  const protocol = tls ? 'rediss' : 'redis'
+  const user = username ? encodeURIComponent(username) : ''
+  const secret = password ? `:${encodeURIComponent(password)}` : ''
+  const auth = user || secret ? `${user}${secret}@` : ''
+  const name = host || 'localhost'
+  const hostname = name.includes(':') && !name.startsWith('[') ? `[${name}]` : name
+  return `${protocol}://${auth}${hostname}:${port ?? 6379}/${database ?? 0}`
+}
+
 /**
  * Redis cache driver implementation using Bun's native Redis client
  */
 export class RedisDriver implements CacheDriver {
   private client: typeof RedisClient.prototype
   private closing = false
-  private options: Required<Omit<RedisDriverOptions, 'compressor' | 'password'>> & {
+  private options: Required<Omit<RedisDriverOptions, 'compressor' | 'username' | 'password'>> & {
     compressor?: RedisDriverOptions['compressor']
+    username?: string
     password?: string
   }
 
@@ -33,9 +67,10 @@ export class RedisDriver implements CacheDriver {
         serialize: (v: any) => JSON.stringify(v),
         deserialize: (v: string | Buffer) => JSON.parse(typeof v === 'string' ? v : v.toString()),
       },
-      url: options.url ?? process.env.REDIS_URL ?? 'redis://localhost:6379',
+      url: redisConnectionUrl(options),
       host: options.host ?? 'localhost',
       port: options.port ?? 6379,
+      username: options.username,
       password: options.password,
       database: options.database ?? 0,
       connectionTimeout: options.connectionTimeout ?? 10000,
@@ -54,8 +89,7 @@ export class RedisDriver implements CacheDriver {
    * Create Redis client instance
    */
   private createClient(): typeof RedisClient.prototype {
-    const url = this.buildConnectionUrl()
-    const client = new RedisClient(url, {
+    const client = new RedisClient(this.options.url, {
       connectionTimeout: this.options.connectionTimeout,
       autoReconnect: this.options.autoReconnect,
       maxRetries: this.options.maxRetries,
@@ -74,19 +108,6 @@ export class RedisDriver implements CacheDriver {
     }
 
     return client
-  }
-
-  /**
-   * Build Redis connection URL
-   */
-  private buildConnectionUrl(): string {
-    if (this.options.url) {
-      return this.options.url
-    }
-
-    const protocol = this.options.tls ? 'rediss' : 'redis'
-    const auth = this.options.password ? `:${this.options.password}@` : ''
-    return `${protocol}://${auth}${this.options.host}:${this.options.port}/${this.options.database}`
   }
 
   /**
