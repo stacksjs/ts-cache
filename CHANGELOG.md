@@ -1,3 +1,22 @@
+[Compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.7...v0.1.8)
+
+## 🐛 Bug Fixes
+
+- **redis**: connect to the host, port and credentials the driver is given ([f21f87c](https://github.com/stacksjs/ts-cache/commit/f21f87c)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.1.8 ([30b84cb](https://github.com/stacksjs/ts-cache/commit/30b84cb)) _(by glennmichael123 <gtorregosa@gmail.com>)_
+- run @stacksjs/logsmith, not the unrelated npm 'logsmith' ([5bf8287](https://github.com/stacksjs/ts-cache/commit/5bf8287)) _(by Chris <chrisbreuer93@gmail.com>)_
+- release through @stacksjs/bumpx, not the unrelated npm 'bumpx' ([410c6be](https://github.com/stacksjs/ts-cache/commit/410c6be)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **deps**: dtsx 0.11.10 ([e29dd0c](https://github.com/stacksjs/ts-cache/commit/e29dd0c)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **deps**: dtsx 0.11.8, for declarations that parse ([8f101aa](https://github.com/stacksjs/ts-cache/commit/8f101aa)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+- _glennmichael123 <gtorregosa@gmail.com>_
+
 [Compare changes](https://github.com/stacksjs/ts-cache/compare/v0.1.6...v0.1.7)
 
 ## 🐛 Bug Fixes
